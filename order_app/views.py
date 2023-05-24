@@ -3,6 +3,7 @@ from django.views.decorators.cache import never_cache
 from django.http import Http404,JsonResponse
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
+from decimal import Decimal
 
 from product_app.models import *
 from . models import *
@@ -11,26 +12,68 @@ from . models import *
 
 # Cart and add to cart need modification
 def cart(request):
-    cart = Cart.objects.filter(customer=request.user).first()
+    cart_items = CartItem.objects.filter(customer=request.user).order_by('id')
+
+    for item in cart_items:
+        item.subtotal = Decimal(item.product.mrp) * item.quantity
+    
+    total = sum((Decimal(item.subtotal) for item in cart_items))
+    
     context = {
-        'cart': cart,
+        'cart_items': cart_items,
+        'total': total,
     }
-    print(cart.cart_items)
-    return render(request, "cart.html", context)
+    return render(request, 'cart.html', context)
+
 
 def add_to_cart(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
-    cart, created = Cart.objects.get_or_create(customer=request.user)
+    try:
+        product = Product.objects.get(id=product_id)
+    except Product.DoesNotExist:
+        return JsonResponse({'message': 'Product does not exist.'}, status=404)
 
-    cart_item, item_created = Cart.objects.get_or_create(
-        cart=cart,
-        product=product,
-        defaults={'quantity': 0}
-    )
+    cart_item, created = CartItem.objects.get_or_create(customer=request.user, product=product)
 
-    cart_item.quantity += 1
+    if created:
+        cart_item.quantity = 1
+    else:
+        cart_item.quantity += 1
     cart_item.save()
-    return redirect('cart')
+
+    return JsonResponse({'message': 'Product quantity updated in cart.'}, status=200)
+
+import json
+def update_cart(request, product_id):
+    cart_item = get_object_or_404(CartItem, product_id=product_id, customer=request.user)
+    try:
+        data = json.loads(request.body)
+        quantity = int(data.get('quantity'))
+    except (json.JSONDecodeError, ValueError, TypeError):
+        return JsonResponse({'message': 'Invalid quantity.'}, status=400)
+    
+    if quantity < 1:
+        return JsonResponse({'message': 'Quantity must be at least 1.'}, status=400)
+
+    cart_item.quantity = quantity
+    cart_item.save()
+
+    return JsonResponse({'message': 'Cart item updated.'}, status=200)
+
+def remove_from_cart(request, product_id):
+    # User authentication not added
+    try:
+        product = Product.objects.get(id=product_id)
+    except Product.DoesNotExist:
+        return JsonResponse({'message': 'Product does not exist.'}, status=404)
+
+    cart_item = CartItem.objects.filter(customer=request.user, product=product)
+    if not cart_item.exists():
+        return JsonResponse({'message': 'Product is not in your cart.'}, status=400)
+
+    cart_item.delete()
+
+    return JsonResponse({'message': 'Product removed from cart.'}, status=200)
+
 
 
 def wish_list(request):
@@ -76,7 +119,7 @@ def get_wishlist_count(request):
     return JsonResponse({'count': count})
 
 def get_cart_count(request):
-    count = Cart.objects.filter(customer=request.user).count()
+    count = CartItem.objects.filter(customer=request.user).count()
     return JsonResponse({'count': count})
 
 # @never_cache

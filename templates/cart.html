@@ -35,7 +35,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                        {% for cart_item in cart.cart_items.all %}
+                        {% for cart_item in cart_items %}
                         <tr>
                             <td class="product-thumbnail">
                                 <img src="{{ cart_item.product.image.url }}" alt="Image" class="img-fluid">
@@ -43,20 +43,20 @@
                             <td class="product-name">
                                 <h2 class="h5 text-black">{{ cart_item.product.name }}</h2>
                             </td>
-                            <td>{{ cart_item.product.price }}</td>
+                            <td>&#x20B9; {{ cart_item.product.mrp }}</td>
                             <td>
-                                <div class="input-group mb-3" style="max-width: 120px;">
-                                    <div class="input-group-prepend">
-                                        <button class="btn btn-outline-primary js-btn-minus" type="button">&minus;</button>
-                                    </div>
-                                    <input type="text" class="form-control text-center" value="{{ cart_item.quantity }}" placeholder="" aria-label="Example text with button addon" aria-describedby="button-addon1">
-                                    <div class="input-group-append">
-                                        <button class="btn btn-outline-primary js-btn-plus" type="button">&plus;</button>
-                                    </div>
+                              <div class="input-group mb-3" style="max-width: 120px;">
+                                <div class="input-group-prepend">
+                                  <button onclick="updateQuantity('{{ cart_item.product.id }}', 'decrease')" class="btn btn-outline-primary js-btn-minus" type="button">&minus;</button>
                                 </div>
+                                <input id="quantity-input-{{ cart_item.product.id }}" type="number" min="1" class="form-control text-center" value="{{ cart_item.quantity }}" placeholder="" aria-label="Example text with button addon" aria-describedby="button-addon1">
+                                <div class="input-group-append">
+                                  <button onclick="updateQuantity('{{ cart_item.product.id }}', 'increase')" class="btn btn-outline-primary js-btn-plus" type="button">&plus;</button>
+                                </div>
+                              </div>
                             </td>
-                            <td>{{ cart_item.product.price }}</td>
-                            <td><a href="#" class="btn btn-primary height-auto btn-sm">X</a></td>
+                            <td>&#x20B9; {{ cart_item.subtotal }}</td>
+                            <td><a href="#" onclick="removeFromCart('{{ cart_item.product.id }}')" class="btn btn-primary height-auto btn-sm">X</a></td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -68,11 +68,8 @@
             <div class="row">
             <div class="col-md-6">
                 <div class="row mb-5">
-                <div class="col-md-6 mb-3 mb-md-0">
-                    <button class="btn btn-primary btn-sm btn-block">Update Cart</button>
-                </div>
                 <div class="col-md-6">
-                    <button class="btn btn-outline-primary btn-sm btn-block">Continue Shopping</button>
+                    <a href="{% url 'shop_all' %}"><button class="btn btn-outline-primary btn-sm btn-block">Continue Shopping</button></a>
                 </div>
                 </div>
                 <div class="row">
@@ -101,7 +98,13 @@
                         <span class="text-black">Subtotal</span>
                     </div>
                     <div class="col-md-6 text-right">
-                        <strong class="text-black">$230.00</strong>
+                        <strong class="text-black">&#x20B9; {{total}}</strong>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="text-black">Shipping</span>
+                    </div>
+                    <div class="col-md-6 text-right">
+                        <strong class="text-black">&#x20B9; 0</strong>
                     </div>
                     </div>
                     <div class="row mb-5">
@@ -109,7 +112,7 @@
                         <span class="text-black">Total</span>
                     </div>
                     <div class="col-md-6 text-right">
-                        <strong class="text-black">$230.00</strong>
+                        <strong class="text-black">&#x20B9; {{total}}</strong>
                     </div>
                     </div>
 
@@ -128,6 +131,72 @@
             {% include 'footer.html' %}
         </footer>
     </div>
+    <script>
+        function removeFromCart(productId) {
+            var csrfToken = getCookie('csrftoken');
+            fetch('/remove-from-cart/' + productId + '/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({})
+            })
+            .then(function(response) {
+            return response.json();
+            })
+            .then(function(data) {
+            
+            console.log(data.message);
+            location.reload();
+            })
+            .catch(function(error) {
+            console.error('Error:', error);
+            });
+        }
+    </script>
+    <script>
+        function updateQuantity(productId, action) {
+            var quantityInput = document.getElementById('quantity-input-' + productId);
+            var quantity = parseInt(quantityInput.value);
+            
+            
+            if (action === 'increase') {
+                quantity += 1;
+            } else if (action === 'decrease') {
+                quantity -= 1;
+            }
+            
+            if (quantity < 1) {
+                alert('Quantity must be at least 1.');
+                return;
+            }
+            
+            var csrfToken = getCookie('csrftoken');
+            
+            fetch(`/update-cart/${productId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    'quantity': quantity
+                })
+            })            
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                console.log(data.message);
+                location.reload();
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+            });
+        }        
+    </script>
     <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
     <script src="{% static 'js/jquery-ui.js' %}"></script>
     <script src="{% static 'js/popper.min.js' %}"></script>
