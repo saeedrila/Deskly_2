@@ -339,7 +339,7 @@ def get_subcategories(request):
 def subcategory_dashboard(request):
     if request.session.get('is_admin'):
         context = {
-            'reviews': Product.objects.order_by('-id'),
+            'subcategories': Subcategory.objects.order_by('-id'),
         }
         return render(request, "subcategory_dashboard.html", context)
     else:
