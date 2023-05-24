@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style type="text/css">
+  .form-signin {
+    width: 100%;
+    max-width: 330px;
+    padding: 15px;
+    margin: auto;
+    }
+
+  .form-signin .form-control {
+    position: relative;
+    box-sizing: border-box;
+    height: auto;
+    padding: 10px;
+    font-size: 16px;
+  }
+  .form-signin .form-control:focus {
+    z-index: 2;
+  }
+  .form-signin input[type="email"] {
+    margin-bottom: -1px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+  .form-signin input[type="password"] {
+    margin-bottom: 10px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+  .h3  {
+    text-align: center;
+  }
+</style>
+
+<div class="tab-content">
+    <div class="tab-pane fade show active" id="pills-login" role="tabpanel" aria-labelledby="tab-login">
+
+        <form class="form-signin" method="post">
+            {% csrf_token %}
+            
+            <img class="img-fluid mx-auto d-block mb-3" src="
+            {% static 'images/deskly-logo.png' %}"
+            alt="Deskly Sign in logo" width="100" height="75">
+            
+            <div class="text-center mb-3">
+                <h1 class="h3 mb-3 font-weight-normal">Enter OTP:</h1>
+            </div>
+            <input type="text" name="otp" id="otp" class="form-control" pattern="[0-9]{6}" placeholder="OTP" required autofocus>
+            <p></p>
+            <button class="btn btn-lg btn-primary btn-block" type="submit">Verify OTP</button>
+
+        </form>
+    </div>
+</div>
+
+
+<div class="d-flex flex-column">
+</div>
+
+
+
+{% endblock content %}
+

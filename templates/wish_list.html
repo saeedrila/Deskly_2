@@ -1,0 +1,131 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Wish List</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mukta:300,400,700"> 
+        <link rel="stylesheet" href="{% static 'fonts/icomoon/style.css' %}">
+        <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+        <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}">
+        <link rel="stylesheet" href="{% static 'css/jquery-ui.css' %}">
+        <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
+        <link rel="stylesheet" href="{% static 'css/owl.theme.default.min.css' %}">
+        <link rel="stylesheet" href="{% static 'css/aos.css' %}">
+        <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    </head>
+    <body>
+    <div class="site-wrap">
+        {% include 'header.html' %}
+        <div class="site-section">
+        <div class="container">
+            <div class="row mb-5">
+            <form class="col-md-12" method="post">
+                <div class="site-blocks-table">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th class="product-thumbnail">Image</th>
+                        <th class="product-name">Product Name</th>
+                        <th class="product-price">Price</th>
+                        <th class="product-quantity">Remove</th>
+                        <th class="product-total">Add to Cart</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in wish_list_items %}
+                        <tr>
+                            <td class="product-thumbnail">
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="img-fluid">
+                            </td>
+                            <td class="product-name">{{ item.product.name }}</td>
+                            <td>&#x20B9; {{ item.product.mrp }}</td>
+                            <td>
+                                <a href="#" onclick="removeFromWishList({{ item.product.id }})"  class="btn btn-outline-primary height-auto btn-sm">X</a>
+                            </td>
+                            <td>
+                                <a href="{% url 'add_to_cart' item.product.id %}" class="btn btn-outline-primary height-auto btn-sm">Add to Cart</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    
+                </table>
+                </div>
+            </form>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row mb-5">
+                        <div class="col-md-6">
+                            <a href="{% url 'shop_all' %}">
+                                <button class="btn btn-outline-primary btn-sm btn-block">Continue Shopping</button>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+        <footer class="site-footer custom-border-top">
+            {% include 'footer.html' %}
+        </footer>
+    </div>
+    <script>
+        function removeFromWishList(productId) {
+          var csrfToken = getCookie('csrftoken'); // Function to retrieve the CSRF token from cookies
+        
+          fetch('/remove-from-wish-list/' + productId + '/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrfToken // Include the CSRF token in the request headers
+            },
+            credentials: 'same-origin', // Include cookies in the request if needed
+            body: JSON.stringify({}) // Empty request body or you can include additional data if required
+          })
+          .then(function(response) {
+            return response.json(); // Parse the response as JSON
+          })
+          .then(function(data) {
+            // Handle the response data here
+            console.log(data.message); // Log the message to the console or display it on the page
+        
+            // You can perform any additional actions based on the response
+            // For example, you can reload the page to reflect the updated wishlist
+            location.reload();
+          })
+          .catch(function(error) {
+            // Handle any error that occurred during the request
+            console.error('Error:', error);
+          });
+        }
+        
+        // Function to retrieve the CSRF token from cookies
+        function getCookie(name) {
+          var cookieValue = null;
+          if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+              var cookie = cookies[i].trim();
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+              }
+            }
+          }
+          return cookieValue;
+        }
+    </script>        
+    <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static 'js/jquery-ui.js' %}"></script>
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/owl.carousel.min.js' %}"></script>
+    <script src="{% static 'js/jquery.magnific-popup.min.js' %}"></script>
+    <script src="{% static 'js/aos.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    </body>
+</html>

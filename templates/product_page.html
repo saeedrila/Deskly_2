@@ -1,0 +1,119 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Product Page</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mukta:300,400,700"> 
+        <link rel="stylesheet" href="{% static 'fonts/icomoon/style.css' %}">
+        <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+        <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}">
+        <link rel="stylesheet" href="{% static 'css/jquery-ui.css' %}">
+        <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
+        <link rel="stylesheet" href="{% static 'css/owl.theme.default.min.css' %}">
+        <link rel="stylesheet" href="{% static 'css/aos.css' %}">
+        <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    </head>
+    <body> 
+        <div class="site-wrap">
+            {% include 'header.html' %}
+            <div class="site-section">
+            <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="item-entry">
+                    <a href="#" class="product-item md-height bg-gray d-block">
+                        <img src="{{product.image.url}}" alt="Image" class="img-fluid">
+                    </a>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h2 class="text-black">{{product.name}}</h2>
+                    <p></p>
+                    <p><strong class="text-primary h4">Rs. {{product.mrp}}</strong></p>
+                    {% comment %} <div class="mb-1 d-flex">
+                    <label for="option-sm" class="d-flex mr-3 mb-3">
+                        <span class="d-inline-block mr-2" style="top:-2px; position: relative;"><input type="radio" id="option-sm" name="shop-sizes"></span> <span class="d-inline-block text-black">Blue</span>
+                    </label>
+                    <label for="option-md" class="d-flex mr-3 mb-3">
+                        <span class="d-inline-block mr-2" style="top:-2px; position: relative;"><input type="radio" id="option-md" name="shop-sizes"></span> <span class="d-inline-block text-black">Black</span>
+                    </label>
+                    </div> {% endcomment %}
+                    <div class="mb-5">
+                        <div class="input-group mb-3" style="max-width: 120px;">
+                            <div class="input-group-prepend">
+                                <button class="btn btn-outline-primary js-btn-minus" type="button">&minus;</button>
+                            </div>
+                            <input type="text" class="form-control text-center" value="1" placeholder="" aria-label="Example text with button addon" aria-describedby="button-addon1">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-primary js-btn-plus" type="button">&plus;</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="button-container">
+                        <a href="{% url 'add_to_cart' product.id %}" class="buy-now btn btn-sm height-auto px-4 py-3 btn-primary">Add To Cart</a>
+                        <a href="#" onclick="addToWishList({{ product.id }})" class="buy-now btn btn-sm height-auto px-4 py-3 btn-primary">Add To Wish List</a>
+                    </div>
+                </div>
+            </div>
+            </div>
+            </div>
+            <footer class="site-footer custom-border-top">
+                {% include 'footer.html' %}
+            </footer>
+        </div>
+        <script>
+            function addToWishList(productId) {
+              var csrfToken = getCookie('csrftoken'); // Function to retrieve the CSRF token from cookies
+            
+              fetch('/add-to-wish-list/' + productId + '/', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRFToken': csrfToken // Include the CSRF token in the request headers
+                },
+                credentials: 'same-origin', // Include cookies in the request if needed
+                body: JSON.stringify({}) // Empty request body or you can include additional data if required
+              })
+              .then(function(response) {
+                return response.json(); // Parse the response as JSON
+              })
+              .then(function(data) {
+                // Handle the response data here
+                console.log(data.message); // Log the message to the console or display it on the page
+            
+                // You can perform any additional actions based on the response, such as updating the UI
+              })
+              .catch(function(error) {
+                // Handle any error that occurred during the request
+                console.error('Error:', error);
+              });
+            }
+            
+            // Function to retrieve the CSRF token from cookies
+            function getCookie(name) {
+              var cookieValue = null;
+              if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                  var cookie = cookies[i].trim();
+                  if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                  }
+                }
+              }
+              return cookieValue;
+            }
+        </script>
+        <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+        <script src="{% static 'js/jquery-ui.js' %}"></script>
+        <script src="{% static 'js/popper.min.js' %}"></script>
+        <script src="{% static 'js/bootstrap.min.js' %}"></script>
+        <script src="{% static 'js/owl.carousel.min.js' %}"></script>
+        <script src="{% static 'js/jquery.magnific-popup.min.js' %}"></script>
+        <script src="{% static 'js/aos.js' %}"></script>
+        <script src="{% static 'js/main.js' %}"></script>
+    </body>
+</html>

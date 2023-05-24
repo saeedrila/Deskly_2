@@ -1,0 +1,140 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Edit Product Details</title>
+  <link rel="shortcut icon" type="image/png" href="#" />
+  <link rel="stylesheet" href="{% static 'modernize/css/styles.min.css' %}" />
+</head>
+
+<body>
+  <!--  Body Wrapper -->
+  <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+    data-sidebar-position="fixed" data-header-position="fixed">
+    <!-- Sidebar Start -->
+    {% include 'dashboard_sidebar.html' %}
+    <!--  Sidebar End -->
+    <!--  Main wrapper -->
+    <div class="body-wrapper">
+      <!--  Header Start -->
+      <header class="app-header">
+        {% include 'snippets/admin_header.html' %}
+      </header>
+      <!--  Header End -->
+      <div class="container-fluid">
+          <div class="container-fluid">
+            <div class="card">
+              <div class="card-body">
+                <h1 class="card-title fw-semibold mb-4">Edit data of Product Id: {{product.id}}</h1>
+                <div class="card">
+                  <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                          <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="basic-default-name">Product Id</label>
+                            <div class="col-sm-10">
+                              <fieldset disabled>
+                              <input type="text" class="form-control" id="basic-default-name"  value="{{product.id}}"/>
+                              <fieldset>
+                            </div>
+                          </div>
+
+                          <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="basic-default-name">Product Name</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="basic-default-name"  value="{{product.name}}" name="name"/>
+                            </div>
+                          </div>
+                          <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="basic-default-name">Product Description</label>
+                            <div class="col-sm-10">
+                              <textarea type="text" class="form-control" id="basic-default-name"  value="" name="name">{{product.description}}</textarea>
+                            </div>
+                          </div>
+                          <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="basic-default-name">Brand</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="basic-default-name"  value="{{product.brand_id_id}}" name="brand"/>
+                            </div>
+                          </div>
+                          <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="basic-default-name">Category</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="basic-default-name" value="{{product.category_id_id}}" name="category_id"/>
+                            </div>
+                          </div>
+                          <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="basic-default-name">Sub-category</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="basic-default-name" value="{{product.sub_category_id_id}}" name="sub_category_id"/>
+                            </div>
+                          </div>
+                          <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="basic-default-name">MRP</label>
+                            <div class="col-sm-10">
+                              <div class="input-group">
+                                <span class="input-group-text">₹</span>
+                                <input type="text" class="form-control" value="{{product.mrp}}" name="mrp"/>
+                              </div>
+                              
+                            </div>
+                          </div>
+                          <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="basic-default-name">Stock</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="basic-default-name" value="{{product.stock}}" name="stock"/>
+                            </div>
+                          </div>
+                          <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="basic-default-name">Product Sold</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="basic-default-name" value="{{product.sell_count}}" name="sell_count"/>
+                            </div>
+                          </div>
+                          <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="basic-default-name">Date Added</label>
+                            <div class="col-sm-10">
+                              <fieldset disabled>
+                              <input type="text" class="form-control" id="basic-default-name" value="{{product.date_added}}"/>
+                              <fieldset>
+                            </div>
+                          </div>
+
+                          <div class="mb-3">
+                            <label for="productImage" class="col-sm-2 col-form-label">Product Image</label>
+                            <img src="{{ product.image.url }}" alt="Product Image" style="max-width: 100px; max-height: 100px;">
+                          </div>
+
+                          <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="exampleCheck1" value="true" {% if product.availability %}checked{% endif %} name="availability">
+                            <label class="form-check-label" for="exampleCheck1">Is Active</label>
+                          </div>
+
+                      <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="py-6 px-6 text-center">
+          <p class="mb-0 fs-4">Designed in India with &#10084 | 2023 | Deskly <a href="#" target="_blank" class="pe-1 text-primary text-decoration-underline"></a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="{% static 'modernize/libs/jquery/dist/jquery.min.js' %}"></script>
+  <script src="{% static 'modernize/libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'modernize/js/sidebarmenu.js' %}"></script>
+  <script src="{% static 'modernize/js/app.min.js' %}"></script>
+  <script src="{% static 'modernize/libs/apexcharts/dist/apexcharts.min.js' %}"></script>
+  <script src="{% static 'modernize/libs/simplebar/dist/simplebar.js' %}"></script>
+  <script src="{% static 'modernize/js/dashboard.js' %}"></script>
+</body>
+
+</html>
