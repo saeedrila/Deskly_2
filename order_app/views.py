@@ -4,9 +4,11 @@ from django.http import Http404,JsonResponse
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from decimal import Decimal
+from django.utils.timezone import now
 
 from product_app.models import *
 from . models import *
+from . forms import PaymentForm
 
 # Create your views here.
 
@@ -24,6 +26,84 @@ def cart(request):
         'total': total,
     }
     return render(request, 'cart.html', context)
+
+
+def checkout_address(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        address1 = request.POST.get('address1')
+        customer = request.user
+
+        address = Address.objects.create(customer=customer, name=name, email=email, line_1=address1)
+
+        return redirect('checkout_payment', address_id=address.id)
+    
+    cart_items = CartItem.objects.filter(customer=request.user).order_by('id')
+
+    for item in cart_items:
+        item.subtotal = Decimal(item.product.mrp) * item.quantity
+    
+    total = sum((Decimal(item.subtotal) for item in cart_items))
+    
+    context = {
+        'cart_items': cart_items,
+        'total': total,
+    }
+    return render(request, "checkout_address.html", context)
+
+
+def checkout_payment(request, address_id=1):
+    cart_items = CartItem.objects.filter(customer=request.user).order_by('id')
+    try:
+        address = Address.objects.get(id=address_id)
+    except Address.DoesNotExist:
+        address = None
+
+    total = 0  # Initialize total amount
+
+    if request.method == 'POST':
+        form = PaymentForm(request.POST)
+        if form.is_valid():
+            payment_option = form.cleaned_data['payment_option']
+            if payment_option == 'cod':
+                for item in cart_items:
+                    product = item.product
+                    quantity = item.quantity
+                    subtotal = Decimal(product.mrp) * quantity
+
+                    order = Order(
+                        customer=request.user,
+                        address=address,
+                        product=product,
+                        quantity=quantity,
+                        payment=payment_option,
+                        date=now(),
+                        status='Pending',
+                    )
+                    order.save()
+
+                    total += subtotal
+                cart_items.delete()
+                return redirect('thank_you')
+            else:
+                messages.error(request, "The selected payment option is not available now. Please choose another option.")
+        else:
+            for field in form:
+                for error in field.errors:
+                    messages.error(request, error)
+    else:
+        form = PaymentForm()
+        form.request = request
+
+    context = {
+        'cart_items': cart_items,
+        'total': total,
+        'form': form,
+        'address': address,
+    }
+    return render(request, "checkout_payment.html", context)
+
 
 
 def add_to_cart(request, product_id):
@@ -169,6 +249,11 @@ def coupon_dashboard(request):
         return render(request, "coupon_dashboard.html", context)
     # else:
     #     return redirect("admin_login")
+
+
+def thank_you(request):
+    context = {}
+    return render(request, "thank_you.html", context)
 
 
 
