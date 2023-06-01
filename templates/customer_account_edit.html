@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Customer Account</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mukta:300,400,700"> 
+    <link rel="stylesheet" href="{% static 'fonts/icomoon/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}">
+    <link rel="stylesheet" href="{% static 'css/jquery-ui.css' %}">
+    <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/owl.theme.default.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/aos.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'modernize/css/styles.min.css' %}" />
+</head>
+<body>
+    <div class="site-wrap">
+        {% include 'header.html' %}
+        <div class="site-section">
+            <div class="container">
+                <!--  Body Wrapper -->
+                <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+                data-sidebar-position="fixed" data-header-position="fixed">
+                    {% include 'snippets/customer_account_sidebar.html' %}
+                    <div class="body-wrapper">
+                        <div class="container-fluid">
+                            <div class="row">
+                            </div>
+                        </div>
+                        <div class="col-lg-12 d-flex align-items-strech">
+                            <div class="card w-100">
+                                <div class="card-body">
+                                    <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+                                        <div class="mb-3 mb-sm-0">
+                                            <h5 class="card-title fw-semibold">Edit Profile Details</h5>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label" for="basic-default-name">Product Name</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" class="form-control" id="basic-default-name"  value="Customer's name" name="name"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    <div class="py-6 px-6 text-center">
+                        {%include 'snippets/admin_footer_copywrite.html'%}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {%include 'snippets/admin_scripts.html'%}
+    <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static 'js/jquery-ui.js' %}"></script>
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/owl.carousel.min.js' %}"></script>
+    <script src="{% static 'js/jquery.magnific-popup.min.js' %}"></script>
+    <script src="{% static 'js/aos.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

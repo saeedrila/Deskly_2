@@ -20,13 +20,6 @@
     {% include 'header.html' %}
     <div class="site-section">
       <div class="container">
-        {% comment %} <div class="row mb-5">
-          <div class="col-md-12">
-            <div class="border p-4 rounded" role="alert">
-              Returning customer? <a href="#">Click here</a> to login
-            </div>
-          </div>
-        </div> {% endcomment %}
         <div class="row">
           <div class="col-md-7 mb-5 mb-md-0">
             <h2 class="h3 mb-3 text-black">Delivery Address</h2>
@@ -38,11 +31,12 @@
             </div>
             <h2 class="h3 mb-3 text-black">Payment Methods</h2>
             <div class="p-3 p-lg-5 border">
-                <form method="post" action="#">
+                <form method="post">
                     {% csrf_token %}
                     {{ form.as_p }}
                     <div class="form-group">
-                        <button class="btn btn-primary btn-lg btn-block" onclick="#">Place Order</button>
+                        <button class="btn btn-primary btn-lg btn-block" id="place-order-btn">Place Order</button>
+                        <button class="btn btn-primary btn-lg btn-block" id="rzp-button1" style="display: none;">Pay with Razorpay</button>
                     </div>
                 </form>
                 {% if form.errors %}
@@ -67,23 +61,25 @@
                       <th>Total</th>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td>Top Up T-Shirt <strong class="mx-2">x</strong> 1</td>
-                        <td>$250.00</td>
-                      </tr>
-                      <tr>
-                        <td>Polo Shirt <strong class="mx-2">x</strong>   1</td>
-                        <td>$100.00</td>
-                      </tr>
-                      <tr>
-                        <td class="text-black font-weight-bold"><strong>Cart Subtotal</strong></td>
-                        <td class="text-black">$350.00</td>
-                      </tr>
-                      <tr>
-                        <td class="text-black font-weight-bold"><strong>Order Total</strong></td>
-                        <td class="text-black font-weight-bold"><strong>$350.00</strong></td>
-                      </tr>
-                    </tbody>
+                      {% for cart_item in cart_items %}
+                    <tr>
+                      <td>{{ cart_item.product.name }} <strong class="mx-2">x</strong> {{ cart_item.quantity }}</td>
+                      <td>&#x20B9; {{ cart_item.subtotal }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                      <td class="text-black font-weight-bold"><strong>Cart Subtotal</strong></td>
+                      <td class="text-black">&#x20B9; {{total}}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-black font-weight-bold"><strong>Shipping</strong></td>
+                      <td class="text-black">&#x20B9; 0</td>
+                    </tr>
+                    <tr>
+                      <td class="text-black font-weight-bold"><strong>Order Total</strong></td>
+                      <td class="text-black font-weight-bold"><strong>&#x20B9; {{net_total}}</strong></td>
+                    </tr>
+                  </tbody>
                   </table>
                 </div>
               </div>
@@ -97,6 +93,22 @@
         {% include 'footer.html' %}
     </footer>
   </div>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Function to handle the payment option change event
+            $('input[name="payment_option"]').change(function() {
+                var selectedOption = $(this).val();
+                if (selectedOption === 'razorpay') {
+                    $('#place-order-btn').hide();
+                    $('#rzp-button1').show();
+                } else {
+                    $('#rzp-button1').hide();
+                    $('#place-order-btn').show();
+                }
+            });
+        });
+    </script>
   <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
   <script src="{% static 'js/jquery-ui.js' %}"></script>
   <script src="{% static 'js/popper.min.js' %}"></script>

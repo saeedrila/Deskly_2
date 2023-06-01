@@ -5,12 +5,16 @@ from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from decimal import Decimal
 from django.utils.timezone import now
+from django.core.paginator import Paginator
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+
+import razorpay
 
 from product_app.models import *
 from . models import *
 from . forms import PaymentForm
 
-# Create your views here.
 
 # Cart and add to cart need modification
 def cart(request):
@@ -52,25 +56,135 @@ def checkout_address(request):
     }
     return render(request, "checkout_address.html", context)
 
+def razorpay_demo(request):
+    if request.method == "POST":
+        name = request. POST .get ("name")
+        amount = int(request.POST. get ("amount")) * 100
+        client = razorpay.Client(auth =("rzp_test_WGlv594z1DLEPO","rSzkwzdBivOZmQK0xu4q3UeD"))
+        payment = client.order.create ({'amount' : amount, 'currency': 'INR', 'payment_capture': '1'})
+        print(payment)
+        purchase = RazorpayDemo(name = name , amount=amount, payment_id = payment ['id' ])
+        purchase.save()
+        context = {
+            'payment': payment
+        }
+        return render(request, "razorpay_demo.html", context)
+    
+    context={}
+    return render(request, "razorpay_demo.html", context)
+
+@csrf_exempt
+def success(request):
+    if request.method =="POST":
+        a = request.POST
+        for key, val in a.items():
+            if key == 'razorpay_order_id':
+                order_id = val
+                break
+        print('***********')
+        print(a)
+        print('***********')
+        print(order_id)
+        order = RazorpayDemo.objects.get(payment_id = order_id)
+        order.paid = True
+        order.save()
+    return render(request, "success.html")
+
+# def razorpay_demo(request, address_id=1):
+#     net_total = 320
+#     address = Address.objects.get(id=address_id)
+#     product = Product.objects.get(id=1)
+#     cart_items = CartItem.objects.get(id=61)
+#     quantity = 10
+#     client = razorpay.Client(auth=(settings.KEY, settings.SECRET))
+#     app_details = {
+#         "title": "Deskly",
+#         "version": "1.0.1"
+#     }
+#     client.set_app_details(app_details)
+
+#     if request.method == 'POST':
+#         print("Entered POST method")
+#         payment_option = 'payment_option'
+#         order = Order(
+#             customer=request.user,
+#             address=address,
+#             product=product,
+#             quantity=quantity,
+#             payment=payment_option,
+#             date=now(),
+#             status='Pending',
+#             net_total=net_total,
+#         )
+#         order.save()
+
+#         amount = 32000
+#         payment = client.order.create({"amount": amount, "currency": "INR", "receipt": "order_rcptid_11"})
+#         response = client.order.create(data = payment)
+
+#         print('********** Razorpay Integration **********')
+#         print('Client:', client)
+#         print('Amount:', amount)
+#         print('Payment:', payment)
+#         print('Response:', response)
+#         print('*******************************************')
+
+#         if 'id' in response:
+#             order.razorpay_order_id = response['id']
+#             order.save()
+
+#             context = {
+#                 'cart': order,
+#                 'net_total': net_total,
+#                 'payment': payment
+#             }
+#             messages.success(request, "Payment successful!")
+#         else:
+#             messages.error(request, "Error creating Razorpay order: {}".format(response.get('error')))
+
+#     context = {
+#         'cart_items': cart_items,
+#         'total': net_total,
+#         'net_total': net_total,
+#         'address': address,
+#     }
+#     return render(request, "razorpay_demo.html", context)
+
+def deskly_razorpay(request, order_id=1):
+    try:
+        order = Order.objects.get(id=order_id)
+    except:
+        messages.error(request, "Order not found")
+    context = {
+        'order': order
+    }
+    return render(request, "razorpay_demo.html", context)
 
 def checkout_payment(request, address_id=1):
     cart_items = CartItem.objects.filter(customer=request.user).order_by('id')
+    total = sum(Decimal(item.product.mrp) * item.quantity for item in cart_items)
+    shipping = 0
+    net_total = total + shipping
+    print('**********')
+    print(net_total)
+    print('**********')
+    for item in cart_items:
+        item.subtotal = Decimal(item.product.mrp) * item.quantity
     try:
         address = Address.objects.get(id=address_id)
     except Address.DoesNotExist:
         address = None
 
-    total = 0  # Initialize total amount
-
     if request.method == 'POST':
         form = PaymentForm(request.POST)
         if form.is_valid():
             payment_option = form.cleaned_data['payment_option']
-            if payment_option == 'cod':
+            if payment_option in ['cod', 'razorpay']:
                 for item in cart_items:
                     product = item.product
                     quantity = item.quantity
                     subtotal = Decimal(product.mrp) * quantity
+                    net_total = subtotal
 
                     order = Order(
                         customer=request.user,
@@ -80,12 +194,42 @@ def checkout_payment(request, address_id=1):
                         payment=payment_option,
                         date=now(),
                         status='Pending',
+                        net_total=net_total,
                     )
                     order.save()
 
-                    total += subtotal
                 cart_items.delete()
-                return redirect('thank_you')
+
+                if payment_option == 'cod':
+                    return redirect('thank_you')
+                else:
+                    try:
+                        # Razorpay
+                        amount = int(net_total) * 100
+                        client = razorpay.Client(auth =("rzp_test_WGlv594z1DLEPO","rSzkwzdBivOZmQK0xu4q3UeD"))
+                        payment = client.order.create ({'amount' : amount, 'currency': 'INR', 'payment_capture': '1'})
+
+                        print('********** Razorpay Integration **********')
+                        print(payment)
+                        print('*******************************************')
+
+                        if 'id' in payment:
+                            order.razorpay_order_id = payment['id']
+                            order.save()
+                            context = {
+                                'cart': order,
+                                'net_total': net_total,
+                                'payment': payment
+                            }
+                            messages.success(request, "Razorpay payment initiated")
+                            return render(request, 'deskly_razorpay.html', context)
+                        else:
+                            messages.error(request, "Error creating Razorpay order: {}".format(payment.get('error')))
+                    except Exception as e:
+                        print('********** Razorpay Integration Error **********')
+                        print('Error:', e)
+                        print('***********************************************')
+                        messages.error(request, "Error during Razorpay integration: {}".format(str(e)))
             else:
                 messages.error(request, "The selected payment option is not available now. Please choose another option.")
         else:
@@ -99,10 +243,110 @@ def checkout_payment(request, address_id=1):
     context = {
         'cart_items': cart_items,
         'total': total,
+        'net_total': net_total,
         'form': form,
         'address': address,
     }
     return render(request, "checkout_payment.html", context)
+
+@csrf_exempt
+def thank_you(request):
+    if request.method =="POST":
+        a = request.POST
+        for key, val in a.items():
+            if key == 'razorpay_order_id':
+                order_id = val
+                break
+        print('***********')
+        print(a)
+        print('***********')
+        print(order_id)
+        order = Order.objects.get(razorpay_order_id = order_id)
+        order.razorpay_paid = True
+        order.razorpay_payment_id = a['razorpay_payment_id']
+        order.razorpay_payment_signature = a['razorpay_signature']
+        order.save()
+        messages.success(request, order_id)
+        return render(request, "thank_you.html")
+    return render(request, "thank_you.html")
+
+# Old codes
+# def checkout_payment(request, address_id=1):
+#     cart_items = CartItem.objects.filter(customer=request.user).order_by('id')
+#     subtotal = 0
+#     net_total = 0
+#     total = 0
+
+#     for item in cart_items:
+#         item.subtotal = Decimal(item.product.mrp) * item.quantity
+#         total = sum((Decimal(item.subtotal) for item in cart_items))
+        
+#     shipping = 0
+#     net_total = total+shipping
+
+#     try:
+#         address = Address.objects.get(id=address_id)
+#     except Address.DoesNotExist:
+#         address = None
+
+#     if request.method == 'POST':
+#         form = PaymentForm(request.POST)
+#         if form.is_valid():
+#             payment_option = form.cleaned_data['payment_option']
+#             if payment_option == 'cod' or payment_option == 'razorpay':
+#                 for item in cart_items:
+#                     product = item.product
+#                     quantity = item.quantity
+#                     subtotal = Decimal(product.mrp) * quantity
+#                     net_total = subtotal
+#                     order = Order(
+#                         customer=request.user,
+#                         address=address,
+#                         product=product,
+#                         quantity=quantity,
+#                         payment=payment_option,
+#                         date=now(),
+#                         status='Pending',
+#                         net_total = net_total,
+#                     )
+#                 cart_items.delete()
+#                 if payment_option == 'cod':
+#                     order.save()
+#                     return redirect('thank_you')
+#                 else:
+#                     client = razorpay.Client(auth = (settings.KEY, settings.SECRET))
+#                     payment = {"amount": int(net_total * 100), "currency": "INR", "receipt": "order_rcptid_11"}
+#                     order.razorpay_order_id = payment['id']
+#                     order.save()
+
+#                     print('**********')
+#                     print(payment)
+#                     print('**********')
+
+#                     context ={
+#                         'cart': order,
+#                         'net_total': net_total,
+#                         'payment': payment
+#                     }
+#                     messages.success(request, )
+#             else:
+#                 messages.error(request, "The selected payment option is not available now. Please choose another option.")
+#         else:
+#             for field in form:
+#                 for error in field.errors:
+#                     messages.error(request, error)
+#     else:
+#         form = PaymentForm()
+#         form.request = request
+
+#     context = {
+#         'cart_items': cart_items,
+#         'total': total,
+#         'net_total': net_total,
+#         'form': form,
+#         'address': address,
+#     }
+#     return render(request, "checkout_payment.html", context)
 
 
 
@@ -202,27 +446,52 @@ def get_cart_count(request):
     count = CartItem.objects.filter(customer=request.user).count()
     return JsonResponse({'count': count})
 
-# @never_cache
+@never_cache
 def order_dashboard(request):
-    # if request.session.get('is_admin'):
+    if request.session.get('is_admin'):
+        orders = Order.objects.order_by('-id')
+        paginator = Paginator(orders, 4)  # Change the number of items per page as needed
+        page_number = request.GET.get('page')
+        page = paginator.get_page(page_number)
         context = {
-            'reviews': Product.objects.order_by('-id'),
+            'messages': messages.get_messages(request),
+            'orders': page,  # Pass the paginated page object to the template
         }
         return render(request, "order_dashboard.html", context)
-    # else:
-    #     return redirect("admin_login")
+    else:
+        return redirect("admin_login")
 
-# @never_cache
-def order_edit(request, order_id):
-    # if request.session.get('is_admin'):
+
+@never_cache
+def order_edit(request, order_id=17):
+    if request.session.get('is_admin'):
+        order = Order.objects.get(id=order_id)
+        if request.POST:
+            order.admin_action = bool(request.POST.get('admin_action'))          
+            order.status = request.POST.get('status')
+            order.save()
+            return redirect("order_dashboard")
         context = {
-            'orders': Order.objects.order_by('-id'),
+            'order': Order.objects.get(id=order_id),
         }
         return render(request, "order_edit.html", context)
-    # else:
-    #     return redirect("admin_login")
+    else:
+        return redirect("admin_login")
+    
+from django.http import JsonResponse
 
-
+def cancel_order(request):
+    if request.method == "POST":
+        order_id = request.POST.get("order_id")
+        # Perform the necessary operations to update the order status
+        try:
+            order = Order.objects.get(id=order_id)
+            order.admin_action = False
+            order.save()
+            return JsonResponse({"status": "success"})
+        except Order.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Order not found"})
+    return JsonResponse({"status": "error", "message": "Invalid request method"})
 
 def edit_customer(request, edit_id):
     if request.session.get('is_admin'):
@@ -250,10 +519,6 @@ def coupon_dashboard(request):
     # else:
     #     return redirect("admin_login")
 
-
-def thank_you(request):
-    context = {}
-    return render(request, "thank_you.html", context)
 
 
 

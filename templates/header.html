@@ -45,6 +45,7 @@
                 <li><a href="{% url 'shop_all' %}">Shop All</a></li>
                 {% if request.user.is_authenticated %}
                 <li><a href="#">Hi {{request.user.username}}</a></li>
+                <li><a href="{% url 'customer_account' %}">Account</a></li>
                 <li><a href="{% url 'logout' %}">Logout</a></li>
                 {% else %}
                 <li><a href="#">Hi Customer</a></li>

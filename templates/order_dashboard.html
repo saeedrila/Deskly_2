@@ -35,7 +35,7 @@
             <div class="card w-100">
               <div class="card-body p-4">
                 <div class="table-responsive">
-                  <table class="table text-nowrap mb-0 align-middle">
+                  <table class="table text-nowrap mb-0 align-middle table-bordered table-hover">
                     <thead class="text-dark fs-4">
                       <tr>
                         <th class="border-bottom-0">
@@ -48,10 +48,19 @@
                           <h6 class="fw-semibold mb-0">Payment Status</h6>
                         </th>
                         <th class="border-bottom-0">
-                          <h6 class="fw-semibold mb-0">Amount</h6>
+                          <h6 class="fw-semibold mb-0">Product Name</h6>
                         </th>
                         <th class="border-bottom-0">
-                          <h6 class="fw-semibold mb-0">Date</h6>
+                          <h6 class="fw-semibold mb-0">Quantity</h6>
+                        </th>
+                        <th class="border-bottom-0">
+                          <h6 class="fw-semibold mb-0">Address</h6>
+                        </th>
+                        <th class="border-bottom-0">
+                          <h6 class="fw-semibold mb-0">Status</h6>
+                        </th>
+                        <th class="border-bottom-0">
+                          <h6 class="fw-semibold mb-0">Cancellation</h6>
                         </th>
                         <th class="border-bottom-0">
                           <h6 class="fw-semibold mb-0">Action</h6>
@@ -59,27 +68,48 @@
                       </tr>
                     </thead>
                     <tbody>
-                        {% for order in orders %}
-                        <tr>
-                            <td class="border-bottom-0"><h6 class="fw-semibold mb-0">1</h6></td>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-1">Sunil Joshi</h6>                        
-                            </td>
-                            <td class="border-bottom-0">
-                            <p class="mb-0 fw-normal">Elite Admin</p>
-                            </td>
-                            <td class="border-bottom-0">
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="badge bg-primary rounded-3 fw-semibold">Low</span>
-                            </div>
-                            </td>
-                            <td class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0 fs-4">$3.9</h6>
-                            </td>
-                        </tr> 
-                        {% endfor %}     
-                    </tbody>
+                      {% for order in orders %}
+                      <tr>
+                        <td class="border-bottom-0"><h6 class="fw-semibold mb-0 {% if not order.admin_action %}text-decoration-line-through{% endif %}">{{ order.id }}</h6></td>
+                        <td class="border-bottom-0"><h6 class="fw-semibold mb-1 {% if not order.admin_action %}text-decoration-line-through{% endif %}">{{ order.customer.id }}</h6></td>
+                        <td class="border-bottom-0"><p class="mb-0 fw-normal {% if not order.admin_action %}text-decoration-line-through{% endif %}">{{ order.payment }}</p></td>
+                        <td class="border-bottom-0"><h6 class="fw-semibold mb-1 {% if not order.admin_action %}text-decoration-line-through{% endif %}">{{ order.product.name }}</h6></td>
+                        <td class="border-bottom-0"><h6 class="fw-semibold mb-1 {% if not order.admin_action %}text-decoration-line-through{% endif %}">{{ order.quantity }}</h6></td>
+                        <td class="border-bottom-0"><p class="mb-0 fw-normal {% if not order.admin_action %}text-decoration-line-through{% endif %}">{{ order.address.line_1 }}</p></td>
+                        <td class="border-bottom-0"><h6 class="fw-semibold mb-1 {% if not order.admin_action %}text-decoration-line-through{% endif %}">{{ order.status }}</h6></td>
+                          <td class="border-bottom-0">
+                              <div class="d-flex align-items-center gap-2">
+                                  <span class="badge {% if order.admin_action %}bg-primary{% else %}bg-danger{% endif %} rounded-3 fw-semibold">
+                                      {% if order.admin_action %}Permitted{% else %}Cancelled{% endif %}
+                                  </span>
+                              </div>
+                          </td>
+                          <td class="border-bottom-0">
+                              <h6 class="fw-semibold mb-1"><a href="{% url 'order_edit' order.id %}">Edit</a></h6>
+                          </td>
+                      </tr> 
+                      {% endfor %}     
+                  </tbody>
+                  
+
                   </table>
+                    <div class="pagination">
+                      {% if orders.has_previous %}
+                      <button class="btn btn-light" onclick="location.href='?page={{ orders.previous_page_number }}'">Previous</button>
+                      {% endif %}
+                  
+                      {% for num in orders.paginator.page_range %}
+                      {% if orders.number == num %}
+                      <span class="current-page btn btn-success">{{ num }}</span>
+                      {% else %}
+                      <button class="btn btn-light" onclick="location.href='?page={{ num }}'">{{ num }}</button>
+                      {% endif %}
+                      {% endfor %}
+                  
+                      {% if orders.has_next %}
+                      <button class="btn btn-light" onclick="location.href='?page={{ orders.next_page_number }}'">Next</button>
+                      {% endif %}
+                  </div>       
                 </div>
               </div>
             </div>

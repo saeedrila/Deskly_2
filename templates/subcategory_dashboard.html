@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sub-category Dashboard</title>
+  <title>Subcategory Dashboard</title>
   <link rel="shortcut icon" type="image/png" href="#" />
   <link rel="stylesheet" href="{% static 'modernize/css/styles.min.css' %}" />
 </head>
@@ -28,8 +28,8 @@
         <!--  Row 1 -->
         <div class="row">
             <div class="card-body p-4">
-                <div class="btn"><h1>Sub-categories</h1></div>
-                <button type="button" class="btn btn-info m-1" style="float:right;">Add New Sub-category</button>
+                <div class="btn"><h1>Subcategories</h1></div>
+                <button type="button" class="btn btn-info m-1" style="float:right;">Add New Subcategory</button>
             </div>
           <!-- Recent Products Added -->
           <div class="col-lg-12 d-flex align-items-stretch">
@@ -47,7 +47,7 @@
                           <h6 class="fw-semibold mb-0">Category</h6>
                         </th>
                         <th class="border-bottom-0">
-                          <h6 class="fw-semibold mb-0">Name</h6>
+                          <h6 class="fw-semibold mb-0">Subcategory</h6>
                         </th>
                         <th class="border-bottom-0">
                           <h6 class="fw-semibold mb-0">Image</h6>
@@ -60,21 +60,21 @@
                     <tbody>
                         {% for subcategory in subcategories %}
                         <tr>
-                            <td class="border-bottom-0"><h6 class="fw-semibold mb-0">1</h6></td>
+                            <td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{subcategory.id}}</h6></td>
                             <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-1">Sunil Joshi</h6>                        
+                                <h6 class="fw-semibold mb-1">{{subcategory.category.name}}</h6>                        
                             </td>
                             <td class="border-bottom-0">
-                            <p class="mb-0 fw-normal">Elite Admin</p>
+                              <h6 class="fw-semibold mb-1">{{subcategory.name}}</h6>                        
                             </td>
                             <td class="border-bottom-0">
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="badge bg-primary rounded-3 fw-semibold">Low</span>
-                            </div>
+                              <h6 class="fw-semibold mb-1">
+                                  <img src="{{ subcategory.image.url }}" alt="Product Image"  style="width: 50px; height: 50px;">
+                              </h6>                        
                             </td>
                             <td class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0 fs-4">$3.9</h6>
-                            </td>
+                              <h6 class="fw-semibold mb-1"><a href="#">Edit</a></h6>                        
+                          </td>
                         </tr> 
                         {% endfor %}     
                     </tbody>

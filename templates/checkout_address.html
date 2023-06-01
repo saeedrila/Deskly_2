@@ -71,11 +71,11 @@
                     </thead>
                     <tbody>
                         {% for cart_item in cart_items %}
-                      <tr>
-                        <td>{{ cart_item.product.name }} <strong class="mx-2">x</strong> {{ cart_item.product.quantity }}</td>
-                        <td>&#x20B9; {{ cart_item.subtotal }}</td>
-                      </tr>
-                      {% endfor %}
+                        <tr>
+                            <td>{{ cart_item.product.name }} <strong class="mx-2">x</strong> {{ cart_item.product.quantity }}</td>
+                            <td>&#x20B9; {{ cart_item.subtotal }}</td>
+                        </tr>
+                        {% endfor %}
                       <tr>
                         <td class="text-black font-weight-bold"><strong>Cart Subtotal</strong></td>
                         <td class="text-black">&#x20B9; {{total}}</td>

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Edit Product Details</title>
+  <title>Add Product</title>
   <link rel="shortcut icon" type="image/png" href="#" />
   <link rel="stylesheet" href="{% static 'modernize/css/styles.min.css' %}" />
 </head>
@@ -28,55 +28,62 @@
           <div class="container-fluid">
             <div class="card">
               <div class="card-body">
-                <h1 class="card-title fw-semibold mb-4">Edit data of Product Id: {{product.id}}</h1>
+                <h1 class="card-title fw-semibold mb-4">Add New product {{product.id}}</h1>
                 <div class="card">
                   <div class="card-body">
+                    
                     <form method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="mb-3">
-                            <label for="exampleInputEmail1" class="form-label">Product Name</label>
-                            <input type="Text" class="form-control" id="exampleInputEmail1" value="{{product.name}}" name="name">
+                          <label for="{{ product_form.name.id_for_label }}" class="form-label">Name:</label>
+                            {{ product_form.name }}
                         </div>
                         <div class="mb-3">
-                          <label for="exampleInputEmail1" class="form-label">Product Description</label>
-                          <input type="Text" class="form-control" id="exampleInputEmail1" value="{{product.name}}" name="description">
-                      </div>
-                        <div class="mb-3">
-                            <label for="exampleInputEmail1" class="form-label">Brand</label>
-                            <input type="Text" class="form-control" id="exampleInputEmail1" value="{{product.brand_id_id}}" name="brand">
+                          <label for="{{ product_form.description.id_for_label }}" class="form-label">Product Description</label>
+                          {{ product_form.description }}
                         </div>
                         <div class="mb-3">
-                            <label for="exampleInputEmail1" class="form-label">Category</label>
-                            <input type="Text" class="form-control" id="exampleInputEmail1" value="{{product.category_id_id}}" name="category_id">
-                        </div>
-                      <div class="mb-3">
-                        <label for="exampleInputEmail1" class="form-label">Sub-category</label>
-                        <input type="Text" class="form-control" id="exampleInputEmail1" value="{{product.sub_category_id_id}}" name="sub_category_id">
-                      </div>
-                      <div class="mb-3">
-                        <label for="exampleInputEmail1" class="form-label">MRP</label>
-                        <input type="Text" class="form-control" id="exampleInputEmail1" value="{{product.mrp}}" name="mrp">
+                          <label for="{{ product_form.brand.id_for_label }}" class="form-label">Brand</label>
+                          {{ product_form.brand }}
                         </div>
                         <div class="mb-3">
-                          <label for="exampleInputEmail1" class="form-label">Stock</label>
-                          <input type="Text" class="form-control" id="exampleInputEmail1" value="{{product.stock}}" name="stock">
+                            <label for="{{ product_form.category.id_for_label }}" class="form-label">Category</label>
+                            <select class="form-control" id="id_category" name="category">
+                                {% for category in product_form.category.field.choices %}
+                                    <option value="{{ category.0 }}">{{ category.1 }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ product_form.sub_category.id_for_label }}" class="form-label">Subcategory</label>
+                            <select class="form-control" id="id_subcategory" name="sub_category" disabled>
+                                <option value="">Select a subcategory</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                          <label for="{{ product_form.mrp.id_for_label }}" class="form-label">MRP</label>
+                          {{ product_form.mrp }}
+                        </div>
+                        <div class="mb-3">
+                          <label for="{{ product_form.stock.id_for_label }}" class="form-label">Stock</label>
+                          {{ product_form.stock }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ product_form.sell_count.id_for_label }}" class="form-label">Sell Count</label>
+                            {{ product_form.sell_count }}
                           </div>
-                          <div class="mb-3">
-                            <label for="exampleInputEmail1" class="form-label">Sell Count</label>
-                            <input type="Text" class="form-control" id="exampleInputEmail1" value="{{product.sell_count}}" name="sell_count">
-                            </div>
-              
-                            <div class="mb-3">
-                              <label for="productImage" class="form-label">Product Image</label>
-                              <input type="file" id="productImage" name="image" multiple="multiple">
-                            </div>
-                            
-                          <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="exampleCheck1" value="true" {% if product.availability %}checked{% endif %} name="availability">
-                            <label class="form-check-label" for="exampleCheck1">Is Active</label>
-                          </div>
-                      <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
+                        <div class="mb-3">
+                          <label for="productImage" class="form-label">Product Image</label>
+                          {{ product_form.image }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ product_form.availability.id_for_label }}" class="form-label">Availability</label>
+                            {{ product_form.availability }}
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                      </form>
+                      
+
                   </div>
                 </div>
               </div>
@@ -89,6 +96,45 @@
       </div>
     </div>
   </div>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function() {
+        $('#id_category').change(function() {
+            console.log("Category selection changed!");
+            var categoryId = $(this).val();
+            $.ajax({
+                url: '/get-subcategories/',
+                data: {
+                    'category_id': categoryId
+                },
+                dataType: 'json',
+                success: function(data) {
+                    var subcategorySelect = $('#id_subcategory');
+                    subcategorySelect.empty();
+                    console.log(subcategorySelect);
+                    if (data.subcategories.length > 0) {
+                        for (var i = 0; i < data.subcategories.length; i++) {
+                            var subcategory = data.subcategories[i];
+                            console.log(subcategory);
+                            subcategorySelect.append($('<option>', {
+                                value: subcategory.id,
+                                text: subcategory.name
+                            }));
+                        }
+                        subcategorySelect.prop('disabled', false);
+                    } else {
+                        subcategorySelect.append($('<option>', {
+                            value: '',
+                            text: 'No subcategories available'
+                        }));
+                        subcategorySelect.prop('disabled', true);
+                    }
+                }          
+            });
+        });
+    });    
+</script>
+
   <script src="{% static 'modernize/libs/jquery/dist/jquery.min.js' %}"></script>
   <script src="{% static 'modernize/libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
   <script src="{% static 'modernize/js/sidebarmenu.js' %}"></script>

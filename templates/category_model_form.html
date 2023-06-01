@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Category Model Form</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 <!-- my_template.html -->
@@ -24,15 +25,27 @@
     </div>
     <div class="form-group">
         <label for="{{ product_form.category.id_for_label }}">Category:</label>
-        {{ product_form.category }}
+        <select class="form-control" id="id_category" name="category">
+            {% for category in product_form.category.field.choices %}
+                <option value="{{ category.0 }}">{{ category.1 }}</option>
+            {% endfor %}
+        </select>
     </div>
+    
     <div class="form-group">
         <label for="{{ product_form.sub_category.id_for_label }}">Subcategory:</label>
-        {{ product_form.sub_category }}
-    </div>
+        <select class="form-control" id="id_subcategory" name="sub_category" disabled>
+            <option value="">Select a subcategory</option>
+        </select>
+    </div>    
+
     <div class="form-group">
         <label for="{{ product_form.mrp.id_for_label }}">MRP:</label>
         {{ product_form.mrp }}
+    </div>
+    <div class="form-group">
+        <label for="{{ product_form.stock.id_for_label }}">Stock:</label>
+        {{ product_form.stock }}
     </div>
     <div class="form-group">
         <label for="{{ product_form.image.id_for_label }}">Image:</label>
@@ -42,21 +55,16 @@
         <label for="{{ product_form.availability.id_for_label }}">Availability:</label>
         {{ product_form.availability }}
     </div>
-    <div class="form-group">
-        <label for="{{ product_form.stock.id_for_label }}">Stock:</label>
-        {{ product_form.stock }}
-    </div>
     <button type="submit">Submit</button>
 </form>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
         $('#id_category').change(function() {
             console.log("Category selection changed!");
             var categoryId = $(this).val();
             $.ajax({
-                url: '/get-subcategories/',  // Update the URL here
+                url: '/get-subcategories/',
                 data: {
                     'category_id': categoryId
                 },
@@ -64,33 +72,29 @@
                 success: function(data) {
                     var subcategorySelect = $('#id_subcategory');
                     subcategorySelect.empty();
-                    console.log(subcategorySelect);  // Check the subcategorySelect element
+                    console.log(subcategorySelect);
                     if (data.subcategories.length > 0) {
                         for (var i = 0; i < data.subcategories.length; i++) {
                             var subcategory = data.subcategories[i];
-                            console.log(subcategory);  // Check the subcategory object
+                            console.log(subcategory);
                             subcategorySelect.append($('<option>', {
                                 value: subcategory.id,
                                 text: subcategory.name
                             }));
                         }
+                        subcategorySelect.prop('disabled', false);
                     } else {
                         subcategorySelect.append($('<option>', {
                             value: '',
                             text: 'No subcategories available'
                         }));
+                        subcategorySelect.prop('disabled', true);
                     }
                 }          
             });
         });
-        $('#id_sub_category').change(function() {
-            console.log("Subcategory selection changed successfully!");
-            // Perform any additional actions or updates based on the subcategory selection
-        });
     });    
 </script>
-    
-
 
 </body>
 </html>

@@ -1,0 +1,150 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Customer Dashboard</title>
+  <link rel="shortcut icon" type="image/png" href="#" />
+  <link rel="stylesheet" href="{% static 'modernize/css/styles.min.css' %}" />
+</head>
+
+<body>
+  <!--  Body Wrapper -->
+  <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+    data-sidebar-position="fixed" data-header-position="fixed">
+    <!-- Sidebar Start -->
+    {% include 'dashboard_sidebar.html' %}
+    <!--  Sidebar End -->
+    <!--  Main wrapper -->
+    <div class="body-wrapper">
+      <!--  Header Start -->
+      <header class="app-header">
+        {% include 'snippets/admin_header.html' %}
+      </header>
+      <!--  Header End -->
+      <div class="container-fluid">
+        <!--  Row 1 -->
+        <div class="row">
+            <div class="card-body p-4">
+                <div class="#"><h1>Customer Dashboard</h1></div>
+            </div>
+          <!-- Recent Products Added -->
+          <div class="col-lg-12 d-flex align-items-stretch">
+            <div class="card w-100">
+              <div class="card-body p-4">
+                <div class="table-responsive">
+                  <table class="table text-nowrap mb-0 align-middle table-bordered table-hover">
+                    <thead class="text-dark fs-4">
+                      <tr>
+                        <th class="border-bottom-0">
+                          <h6 class="fw-semibold mb-0">Id</h6>
+                        </th>
+                        <th class="border-bottom-0">
+                          <h6 class="fw-semibold mb-0">User Name</h6>
+                        </th>
+                        <th class="border-bottom-0">
+                          <h6 class="fw-semibold mb-0">First Name</h6>
+                        </th>
+                        <th class="border-bottom-0">
+                          <h6 class="fw-semibold mb-0">Last Name</h6>
+                        </th>
+                        <th class="border-bottom-0">
+                          <h6 class="fw-semibold mb-0">email</h6>
+                        </th>
+                        <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0">Mobile</h6>
+                        </th>
+                        <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0">Is Verified</h6>
+                        </th>
+                        <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0">Is Active</h6>
+                        </th>
+                        <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0">Date Joined</h6>
+                        </th>
+                        <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0">Action</h6>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for customer in customers %}
+                      <tr>
+                          <td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{ customer.id }}</h6></td>
+                          <td class="border-bottom-0">
+                              <h6 class="fw-semibold mb-1">{{ customer.username }}</h6>
+                          </td>
+                          <td class="border-bottom-0">
+                              <h6 class="fw-semibold mb-1">{{ customer.first_name }}</h6>
+                          </td>
+                          <td class="border-bottom-0">
+                              <h6 class="fw-semibold mb-1">{{ customer.last_name }}</h6>
+                          </td>
+                          <td class="border-bottom-0">
+                              <h6 class="fw-semibold mb-1">{{ customer.email }}</h6>
+                          </td>
+                          <td class="border-bottom-0">
+                              <h6 class="fw-semibold mb-1">{{ customer.mobile }}</h6>
+                          </td>
+                          <td class="border-bottom-0">
+                              <div class="d-flex align-items-center gap-2">
+                                  <span class="badge {% if customer.is_verified %}bg-primary{% else %}bg-danger{% endif %} rounded-3 fw-semibold">
+                                      {% if customer.is_verified %}Verified{% else %}Not Verified{% endif %}
+                                  </span>
+                              </div>
+                          </td>
+                          <td class="border-bottom-0">
+                              <div class="d-flex align-items-center gap-2">
+                                  <span class="badge {% if customer.is_active %}bg-primary{% else %}bg-danger{% endif %} rounded-3 fw-semibold">
+                                      {% if customer.is_active %}Active{% else %}Inactive{% endif %}
+                                  </span>
+                              </div>
+                          </td>
+                          <td class="border-bottom-0">
+                              <h6 class="fw-semibold mb-1">{{ customer.date_joined }}</h6>
+                          </td>
+                          <td class="border-bottom-0">
+                              <h6 class="fw-semibold mb-1">
+                                  <a href="{% url 'edit_customer' customer.id %}">Edit</a>
+                              </h6>
+                          </td>
+                      </tr>
+                      {% endfor %}
+                  </tbody>
+                  
+                  </table>
+                </div>
+                <div class="pagination">
+                  {% if customers.has_previous %}
+                      <button class="btn btn-light" onclick="location.href='?page={{ customers.previous_page_number }}'">Previous</button>
+                  {% endif %}
+                  
+                  {% for num in customers.paginator.page_range %}
+                      {% if customers.number == num %}
+                          <span class="current-page btn btn-success">{{ num }}</span>
+                      {% else %}
+                          <button class="btn btn-light" onclick="location.href='?page={{ num }}'">{{ num }}</button>
+                      {% endif %}
+                  {% endfor %}
+                  
+                  {% if customers.has_next %}
+                      <button class="btn btn-light" onclick="location.href='?page={{ customers.next_page_number }}'">Next</button>
+                  {% endif %}
+              </div>
+              
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="py-6 px-6 text-center">
+          {%include 'snippets/admin_footer_copywrite.html'%}        </div>
+      </div>
+    </div>
+  </div>
+  {%include 'snippets/admin_scripts.html'%}
+</body>
+
+</html>

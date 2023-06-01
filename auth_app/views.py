@@ -7,12 +7,15 @@ from django.core.files.storage import default_storage
 from django.contrib import messages
 from django.views.decorators.cache import never_cache
 import time
-from django.http import Http404
+from django.http import Http404, JsonResponse
+from django.core.paginator import Paginator
 
 from . forms import RegistrationForm, AccountAuthenticationForm, AccountUpdateForm
 from . models import *
 from product_app.models import *
 from product_app.forms import *
+from . forms import *
+from order_app.models import *
 
 
 def demo_home(request):
@@ -106,18 +109,105 @@ def customer_login(request):
     context['login_form'] = form
     return render(request, 'login.html', context)
 
+def customer_account_dashboard(request):
+    user = request.user
+    if user.is_authenticated:
+        account = request.user
+        context = {
+            'account': account,
+        }
+        return render(request, "customer_account_dashboard.html", context)
+    else:
+        return redirect ('home')
+
 def customer_account(request):
-    context = {}
-    context['popular_products'] = Product.objects.order_by('-sell_count')[:3]
-    context['categories'] = Category.objects.all()[:6]
-    context['latest_products'] = Product.objects.order_by('-date_added')[:6]
+    user = request.user
+    if user.is_authenticated:
+        account = request.user
+        context = {
+            'account': account,
+        }
+        return render(request, "customer_account.html", context)
+    else:
+        return redirect ('home')
     
-    return render(request, "customer_account.html", context)
+def customer_account_edit(request):
+    user = request.user
+    if user.is_authenticated:
+        account = request.user
+        context = {
+            'account': account,
+        }
+        return render(request, "customer_account_edit.html", context)
+    else:
+        return redirect ('home')
+
+def customer_address(request):
+    customer_addresses = Address.objects.filter(customer=request.user)
+    context = {
+        'customer_addresses': customer_addresses,
+    }
+    return render(request, "customer_address.html", context)
+
+
+def customer_address_add(request):
+    user = request.user
+    if request.POST:
+        name = request.POST['name']
+        email = request.POST['email']
+        line_1 = request.POST['line_1']
+
+        address = Address()
+        address.customer = user
+        address.name = name
+        address.email = email
+        address.line_1 = line_1
+        address.save()
+        return redirect(customer_address)
+
+    context = {}
+    return render(request, "customer_address_add.html", context)
+
+def customer_address_edit(request, address_id):
+    user = request.user
+    if request.POST:
+        name = request.POST['name']
+        email = request.POST['email']
+        line_1 = request.POST['line_1']
+
+        address = Address()
+        address.customer = user
+        address.name = name
+        address.email = email
+        address.line_1 = line_1
+        address.save()
+        return redirect(customer_address)
+
+    context = {}
+    return render(request, "customer_address_add.html", context)
+
+def customer_orders(request):
+    customer_orders = Order.objects.filter(customer=request.user).order_by('-id')
+    context = {
+        'orders': customer_orders,
+    }
+    return render(request, "customer_orders.html", context)
+
+def customer_orders_cancel(request, order_id):
+    order_id = order_id
+    customer_orders = Order.objects.filter(customer=request.user)
+    context = {
+        'orders': customer_orders,
+    }
+    return render(request, "customer_orders_cancel.html", context)
+
+
 
 def shop_all(request):
     context = {}
     try:
         context['products'] = Product.objects.all()
+        context['categories'] = Category.objects.all()
     except Product.DoesNotExist:
         raise Http404("Product does not exist.")
     return render(request, "shop_all.html", context)
@@ -169,8 +259,13 @@ def admin_dashboard(request):
 @never_cache
 def customer_dashboard(request):
     if request.session.get('is_admin'):
+        customers = Account.objects.order_by('-id')
+        paginator = Paginator(customers, 4)  # Change the number of items per page as needed
+        page_number = request.GET.get('page')
+        page = paginator.get_page(page_number)
         context = {
-            'customers': Account.objects.order_by('-id'),
+            'messages': messages.get_messages(request),
+            'customers': page,  # Pass the paginated page object to the template
         }
         return render(request, "customer_dashboard.html", context)
     else:
@@ -194,12 +289,14 @@ def edit_customer(request, edit_id):
 @never_cache
 def product_dashboard(request):
     if request.session.get('is_admin'):
+        products = Product.objects.order_by('-id')
+        paginator = Paginator(products, 4)
+        page_number = request.GET.get('page')
+        page = paginator.get_page(page_number)
         context = {
             'messages': messages.get_messages(request),
-            'products': Product.objects.order_by('-id'), 
+            'products': page, 
         }
-        time.sleep(2)
-        print(request)
         return render(request, "product_dashboard.html", context)
     else:
         return redirect('admin_login')
@@ -243,48 +340,6 @@ def edit_product(request, edit_id=None):
         return redirect('admin_login')
 
 @never_cache
-def add_product(request):
-    if request.session.get('is_admin'):
-        if request.POST:
-            product_obj = Product()
-            product_obj.name = request.POST.get('name')
-            product_obj.description = request.POST.get('description')
-            brand_id = request.POST.get('brand')
-            category_id = request.POST.get('category_id')
-            sub_category_id = request.POST.get('sub_category_id')
-            try:
-                brand_obj = Brand.objects.get(id=brand_id)
-                product_obj.brand_id = brand_obj
-            except Brand.DoesNotExist:
-                pass
-            try:
-                category_obj = Category.objects.get(id=category_id)
-                product_obj.category_id = category_obj
-            except Category.DoesNotExist:
-                pass
-            try:
-                sub_category_obj = Subcategory.objects.get(id=sub_category_id)
-                product_obj.sub_category_id = sub_category_obj
-            except Subcategory.DoesNotExist:
-                pass
-            product_obj.mrp = request.POST.get('mrp')
-            product_obj.availability = bool(request.POST.get('availability'))
-            product_obj.stock = request.POST.get('stock')
-            product_obj.sell_count = request.POST.get('sell_count')
-            if 'image' in request.FILES:
-                image_file = request.FILES['image']
-                filename = default_storage.save('products/' + image_file.name, ContentFile(image_file.read()))
-                product_obj.image = filename
-
-            product_obj.save()
-            messages.success(request, 'Product successfully added.')
-            return redirect("product_dashboard")
-        context = {}
-        return render(request, "add_product.html", context)
-    else:
-        return redirect('admin_login')
-
-@never_cache
 def review_dashboard(request):
     if request.session.get('is_admin'):
         context = {
@@ -304,34 +359,6 @@ def category_dashboard(request):
     else:
         return redirect("admin_login")
 
-
-# Category Model Form views
-from .forms import *
-from django.http import JsonResponse
-
-def category_model_form(request):
-    if request.method == 'POST':
-        product_form = ProductForm(request.POST)
-        if product_form.is_valid():
-            product = product_form.save()
-            return redirect('success')
-    else:
-        product_form = ProductForm()
-        context = {
-            'product_form': product_form,
-        }
-        print(product_form)
-        return render(request, 'category_model_form.html', context)
-
-def get_subcategories(request):
-    category_id = request.GET.get('category_id')
-    subcategories = Subcategory.objects.filter(category_id=category_id).values('id', 'name')
-    subcategories_list = list(subcategories)  # Convert queryset to list
-    context = {
-        'subcategories': subcategories_list,
-    }
-    print(context)
-    return JsonResponse(context, safe=False)
 
 
 

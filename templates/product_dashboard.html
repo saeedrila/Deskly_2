@@ -72,10 +72,10 @@
                           <h6 class="fw-semibold mb-0">Brand</h6>
                         </th>
                         <th class="border-bottom-0">
-                          <h6 class="fw-semibold mb-0">Category ID</h6>
+                          <h6 class="fw-semibold mb-0">Category</h6>
                         </th>
                         <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0">Sub-category ID</h6>
+                            <h6 class="fw-semibold mb-0">Subcategory</h6>
                           </th>
                           <th class="border-bottom-0">
                             <h6 class="fw-semibold mb-0">MRP</h6>
@@ -101,52 +101,70 @@
                       </tr>
                     </thead>
                     <tbody>
-                        {% for product in products %}
-                        <tr>
-                            <td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{product.id}}</h6></td>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-1">{{product.name}}</h6>                        
-                            </td>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-1">{{product.brand_id_id}}</h6>                        
-                            </td>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-1">{{product.category_id_id}}</h6>                        
-                            </td>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-1">{{product.sub_category_id_id}}</h6>                        
-                            </td>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-1">{{product.mrp}}</h6>                        
-                            </td>
-                            <td class="border-bottom-0">
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="badge bg-primary rounded-3 fw-semibold">{{product.availability}}</span>
-                            </div>
-                            </td>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-1">{{product.stock}}</h6>                        
-                            </td>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-1">{{product.sell_count}}</h6>                        
-                            </td>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-1">{{product.date_added}}</h6>                        
-                            </td>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-1">
-                                    <img src="{{ product.image.url }}" alt="Product Image"  style="width: 50px; height: 50px;">
-                                </h6>                        
-                            </td>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-1"><a href="{% url 'edit_product' product.id %}">Edit</a></h6>                        
-                            </td>
-                        </tr> 
-                        {% endfor %}     
-                    </tbody>
+                      {% for product in products %}
+                      <tr>
+                          <td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{product.id}}</h6></td>
+                          <td class="border-bottom-0">
+                              <h6 class="fw-semibold mb-1">{{product.name}}</h6>                        
+                          </td>
+                          <td class="border-bottom-0">
+                              <h6 class="fw-semibold mb-1">{{product.brand.name}}</h6>                        
+                          </td>
+                          <td class="border-bottom-0">
+                              <h6 class="fw-semibold mb-1">{{product.category.name}}</h6>                        
+                          </td>
+                          <td class="border-bottom-0">
+                              <h6 class="fw-semibold mb-1">{{product.sub_category.name}}</h6>                        
+                          </td>
+                          <td class="border-bottom-0">
+                              <h6 class="fw-semibold mb-1">{{product.mrp}}</h6>                        
+                          </td>
+                          <td class="border-bottom-0">
+                          <div class="d-flex align-items-center gap-2">
+                              <span class="badge bg-primary rounded-3 fw-semibold">{{product.availability}}</span>
+                          </div>
+                          </td>
+                          <td class="border-bottom-0">
+                              <h6 class="fw-semibold mb-1">{{product.stock}}</h6>                        
+                          </td>
+                          <td class="border-bottom-0">
+                              <h6 class="fw-semibold mb-1">{{product.sell_count}}</h6>                        
+                          </td>
+                          <td class="border-bottom-0">
+                              <h6 class="fw-semibold mb-1">{{product.date_added}}</h6>                        
+                          </td>
+                          <td class="border-bottom-0">
+                              <h6 class="fw-semibold mb-1">
+                                  <img src="{{ product.image.url }}" alt="Product Image"  style="width: 50px; height: 50px;">
+                              </h6>                        
+                          </td>
+                          <td class="border-bottom-0">
+                              <h6 class="fw-semibold mb-1"><a href="{% url 'edit_product' product.id %}">Edit</a></h6>                        
+                          </td>
+                      </tr> 
+                      {% endfor %}     
+                  </tbody>
                   </table>
                 </div>
-              </div>
+                <!-- Pagination links -->
+                <div class="pagination">
+                  {% if products.has_previous %}
+                    <button class="btn btn-light" onclick="location.href='?page={{ products.previous_page_number }}'">Previous</button>
+                  {% endif %}
+                
+                  {% for num in products.paginator.page_range %}
+                    {% if products.number == num %}
+                      <span class="current-page btn btn-success">{{ num }}</span>
+                    {% else %}
+                      <button class="btn btn-light" onclick="location.href='?page={{ num }}'">{{ num }}</button>
+                    {% endif %}
+                  {% endfor %}
+                
+                  {% if products.has_next %}
+                    <button class="btn btn-light" onclick="location.href='?page={{ products.next_page_number }}'">Next</button>
+                  {% endif %}
+                </div>
+                </div>
             </div>
           </div>
         </div>

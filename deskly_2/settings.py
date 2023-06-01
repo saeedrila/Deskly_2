@@ -143,3 +143,7 @@ DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+#Razorpay Payment Configuration
+KEY = 'rzp_test_WGlv594z1DLEPO'
+SECRET = 'rSzkwzdBivOZmQK0xu4q3UeD'

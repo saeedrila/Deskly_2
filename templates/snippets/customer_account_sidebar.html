@@ -1,0 +1,64 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'modernize/css/styles.min.css' %}" />
+<div class="left-sidebar mt-8">
+    <!-- Sidebar scroll-->
+    <!-- Sidebar navigation-->
+    <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+        <ul id="sidebarnav">
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="#" aria-expanded="false">
+                <span><span class="hide-menu"></span>
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="#" aria-expanded="false">
+                <span><span class="hide-menu"></span>
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="#" aria-expanded="false">
+                <span><span class="hide-menu"></span>
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="#" aria-expanded="false">
+                <span><span class="hide-menu"></span>
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="{% url 'customer_account_dashboard' %}" aria-expanded="false">
+                <span>
+                    <i class="ti ti-layout-dashboard"></i>
+                </span>
+                <span class="hide-menu">Dashboard</span>
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="{% url 'customer_account' %}" aria-expanded="false">
+                <span>
+                    <i class="ti ti-user-plus"></i>
+                </span>
+                <span class="hide-menu">Account</span>
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="{% url 'customer_orders' %}" aria-expanded="false">
+                <span>
+                    <i class="ti ti-article"></i>
+                </span>
+                <span class="hide-menu">My Orders</span>
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="{% url 'customer_address' %}" aria-expanded="false">
+                <span>
+                    <i class="ti ti-cards"></i>
+                </span>
+                <span class="hide-menu">Saved Addresses</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <!-- End Sidebar navigation -->
+    <!-- End Sidebar scroll-->
+</div>

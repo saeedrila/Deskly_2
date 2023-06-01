@@ -47,6 +47,10 @@ class Account(AbstractBaseUser):
 
 	def __str__(self):
 		return self.email
+	
+	def save(self, *args, **kwargs):
+		self.username = self.username  # Set the username to the email address
+		super(Account, self).save(*args, **kwargs)
 
 	# For checking permissions. to keep it simple all admin have ALL permissons
 	def has_perm(self, perm, obj=None):

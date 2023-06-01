@@ -11,10 +11,11 @@ class RegistrationForm(UserCreationForm):
 	    max_length=254, 
 		help_text='Required. Add a valid email address.'
 	)
+    username = forms.CharField(max_length=30)
 
     class Meta:
         model = Account
-        fields = ('email', 'password1', 'password2', )
+        fields = ('email', 'username', 'password1', 'password2', )
 
 
 class AccountAuthenticationForm(forms.ModelForm):
