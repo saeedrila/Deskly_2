@@ -40,7 +40,7 @@
                 <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
                 </div>
                     <div class="card-body">
-                      <h1 class="card-title fw-semibold mb-4">Cancel Order: Order ID: {{order.id}}</h1>
+                      <h1 class="card-title fw-semibold mb-4">Cancel Order with Order ID: {{order.id}}</h1>
                       <div class="card">
                         <div class="card-body">
                           <form method="POST">
@@ -107,10 +107,11 @@
                               </div>
            
                     
-                                <div class="mb-3 form-check">
-                                  <input type="checkbox" class="form-check-input" id="exampleCheck1" value="true" {% if order.admin_action %}checked{% endif %} name="admin_action">
-                                  <label class="form-check-label" for="exampleCheck1">I confirm that I want to cancel the order</label>
-                                </div>
+                              <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="exampleCheck1" {% if order.admin_action %}checked{% endif %} name="admin_action">
+                                <label class="form-check-label" for="exampleCheck1">I confirm that I want to cancel the order</label>
+                                <input type="hidden" id="adminActionValue" name="admin_action_value" value="{% if order.admin_action %}True{% else %}False{% endif %}">
+                              </div>
                             <button type="submit" class="btn btn-primary">Submit</button>
                           </form>
                         </div>
@@ -130,6 +131,18 @@
     </div>
     {%include 'snippets/admin_scripts.html'%}
 
+    <script>
+      const checkbox = document.getElementById('exampleCheck1');
+      const adminActionValue = document.getElementById('adminActionValue');
+    
+      checkbox.addEventListener('change', function() {
+        if (checkbox.checked) {
+          adminActionValue.value = 'False';
+        } else {
+          adminActionValue.value = 'True';
+        }
+      });
+    </script>
 
     <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
     <script src="{% static 'js/jquery-ui.js' %}"></script>

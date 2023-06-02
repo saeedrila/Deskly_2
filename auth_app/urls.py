@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 
 urlpatterns = [
@@ -17,6 +17,9 @@ urlpatterns = [
 
     path('ad-template',views.ad_template, name='ad_template'),
     path('ad-edit-template',views.ad_edit_template, name='ad_edit_template'),
+
+
+
 
 #Customer account dashboard
     path('customer-account-dashboard',views.customer_account_dashboard, name='customer_account_dashboard'),

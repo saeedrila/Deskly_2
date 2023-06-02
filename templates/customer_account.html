@@ -39,7 +39,7 @@
                                                             Profile photo comes here:
                                                         </div>
                                                     <div class="col-4">
-                                                    Username
+                                                    {{account.username}}
                                                 </div>
                                             </div>
                                         </div>
@@ -57,8 +57,28 @@
                                     </div>
                                     <div class="mb-3">
                                         <div class="row mb-3">
-                                            <div class="col-sm-3 col">Username</div>
-                                            <div class="col-sm-9 form-label">label</div>
+                                            <div class="col-sm-3 col">Username:</div>
+                                            <div class="col-sm-9 form-label">{{account.username}}</div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-sm-3 col">First Name:</div>
+                                            <div class="col-sm-9 form-label">{{account.first_name}}</div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-sm-3 col">Last Name:</div>
+                                            <div class="col-sm-9 form-label">{{account.last_name}}</div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-sm-3 col">Email:</div>
+                                            <div class="col-sm-9 form-label">{{account.email}}</div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-sm-3 col">Mobile:</div>
+                                            <div class="col-sm-9 form-label">{{account.mobile}}</div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-sm-3 col">Is Verified</div>
+                                            <div class="col-sm-9 form-label">{{account.is_verified}}</div>
                                         </div>
                                     </div>
                                     <button type="submit" class="btn btn-primary">Edit Details</button>

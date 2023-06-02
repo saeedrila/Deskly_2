@@ -17,7 +17,10 @@ urlpatterns = [
 
 
 
+
     #Sample pages
+    path('search-demo', views.search_demo, name='search_demo'),
+    path('get-names/', views.get_names, name='get_names'),
     path('example-form/', views.example_form, name='example_form'),
     path('category-model-form/', views.category_model_form, name='category_model_form'),
     path('get-subcategories/', views.get_subcategories, name='get_subcategories'),

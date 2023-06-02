@@ -110,11 +110,22 @@ def customer_login(request):
     return render(request, 'login.html', context)
 
 def customer_account_dashboard(request):
-    user = request.user
-    if user.is_authenticated:
+    if request.user.is_authenticated:
+        customer_orders = Order.objects.filter(customer=request.user).order_by('-id')[:5]
+        latest_order = Order.objects.filter(customer=request.user).order_by('-id')[:1]
+        order_count = Order.objects.filter(customer=request.user).count()
+        labels = []
+        data = []
+        for order in customer_orders:
+            labels.append(order.id)
+            data.append(order.net_total)
         account = request.user
         context = {
             'account': account,
+            'labels': labels,
+            'data': data,
+            'latest_order': latest_order,
+            'order_count': order_count,
         }
         return render(request, "customer_account_dashboard.html", context)
     else:
@@ -188,16 +199,24 @@ def customer_address_edit(request, address_id):
 
 def customer_orders(request):
     customer_orders = Order.objects.filter(customer=request.user).order_by('-id')
+    if 'messages' in request.session:
+        messages.success(request, request.session.pop('messages'))
     context = {
         'orders': customer_orders,
     }
     return render(request, "customer_orders.html", context)
 
 def customer_orders_cancel(request, order_id):
-    order_id = order_id
-    customer_orders = Order.objects.filter(customer=request.user)
+    if request.POST:
+        admin_action = request.POST['admin_action_value']
+        order = Order.objects.get(id=order_id)
+        order.admin_action = admin_action
+        order.save()
+        messages.success(request, "Order successfully cancelled")
+        return redirect("customer_orders")
+    order = Order.objects.get(id=order_id)
     context = {
-        'orders': customer_orders,
+        'order': order,
     }
     return render(request, "customer_orders_cancel.html", context)
 
@@ -229,6 +248,7 @@ def admin_login(request):
 def admin_dashboard(request):
     if request.session.get('is_admin'):
         orders = Order.objects.order_by('-id')[:5]
+        recent_products_added = Product.objects.order_by('-id')[:6]
         labels = []
         data = []
         for order in orders:
@@ -236,7 +256,7 @@ def admin_dashboard(request):
             data.append(order.net_total)
         context = {
             'recent_orders': range(6),
-            'recent_products_added': Product.objects.order_by('-id')[:6],
+            'recent_products_added': recent_products_added,
             'labels': labels,
             'data': data,
         }

@@ -35,7 +35,13 @@
                                             <h5 class="card-title fw-semibold">My Orders</h5>
                                         </div>
                                     </div>
-
+                                    <div class="card-body p-4">
+                                      {% if messages %}
+                                      {% for message in messages %}
+                                          <div class="alert alert-success">{{ message }}</div>
+                                      {% endfor %}
+                                      {% endif %} 
+                                  </div>
                                     <div class="table-responsive">
                                         <table class="table text-nowrap mb-0 align-middle table-bordered table-hover">
                                           <thead class="text-dark fs-4">

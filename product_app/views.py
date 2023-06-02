@@ -7,6 +7,21 @@ from django.core.paginator import Paginator
 
 from . forms import *
 
+def search_demo(request):
+    return render(request, 'search_demo.html')
+
+def get_names(request):
+    search = request.GET.get('search')
+    payload = []
+    if search:
+        objs = Names.objects.filter(name__icontains=search)
+        for obj in objs:
+            payload.append({
+                'name': obj.name
+            })
+    return JsonResponse(payload, safe=False)
+
+
 
 def shop_all(request):
     context = {}
@@ -146,6 +161,18 @@ def offer_dashboard(request):
         return redirect("admin_login")
 
 
+#Dependent drop down menu
+def get_subcategories(request):
+    category_id = request.GET.get('category_id')
+    subcategories = Subcategory.objects.filter(category_id=category_id).values('id', 'name')
+    subcategories_list = list(subcategories)  # Convert queryset to list
+    context = {
+        'subcategories': subcategories_list,
+    }
+    print(context)
+    return JsonResponse(context, safe=False)
+
+
 #Sample methods
 def example_form(request):
     example_form_instance = ExampleForm()
@@ -166,14 +193,3 @@ def category_model_form(request):
             'product_form': product_form,
         }
         return render(request, 'category_model_form.html', context)
-
-#Dependent drop down menu
-def get_subcategories(request):
-    category_id = request.GET.get('category_id')
-    subcategories = Subcategory.objects.filter(category_id=category_id).values('id', 'name')
-    subcategories_list = list(subcategories)  # Convert queryset to list
-    context = {
-        'subcategories': subcategories_list,
-    }
-    print(context)
-    return JsonResponse(context, safe=False)

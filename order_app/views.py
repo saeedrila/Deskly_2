@@ -19,6 +19,8 @@ from . forms import PaymentForm
 
 # Cart and add to cart need modification
 def cart(request):
+    if not request.user.is_authenticated:
+        return redirect("home")
     cart_items = CartItem.objects.filter(customer=request.user).order_by('id')
 
     for item in cart_items:
@@ -32,7 +34,7 @@ def cart(request):
     }
     return render(request, 'cart.html', context)
 
-
+@never_cache
 def checkout_address(request):
     if request.method == 'POST':
         selected_address_id = request.POST.get('selected_address')
@@ -60,7 +62,7 @@ def checkout_address(request):
         }
         return render(request, "checkout_address.html", context)
 
-
+@never_cache
 def deskly_razorpay(request, order_id=1):
     try:
         order = Order.objects.get(id=order_id)
@@ -71,7 +73,7 @@ def deskly_razorpay(request, order_id=1):
     }
     return render(request, "razorpay_demo.html", context)
 
-
+@never_cache
 def checkout_payment(request, address_id=1):
     cart_items = CartItem.objects.filter(customer=request.user).order_by('id')
     total = sum(Decimal(item.product.mrp) * item.quantity for item in cart_items)
@@ -161,6 +163,7 @@ def checkout_payment(request, address_id=1):
     }
     return render(request, "checkout_payment.html", context)
 
+@never_cache
 @csrf_exempt
 def thank_you(request):
     if request.method =="POST":
@@ -234,6 +237,8 @@ def remove_from_cart(request, product_id):
 
 
 def wish_list(request):
+    if not request.user.is_authenticated:
+        return redirect("home")
     wish_list_items = WishList.objects.filter(customer=request.user)
     context = {
         'wish_list_items': wish_list_items,
@@ -314,6 +319,7 @@ def order_edit(request, order_id=17):
             order.status = request.POST.get('status')
             order.save()
             return redirect("order_dashboard")
+
         context = {
             'order': Order.objects.get(id=order_id),
         }

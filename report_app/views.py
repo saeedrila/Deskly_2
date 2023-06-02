@@ -102,6 +102,21 @@ def chart_demo(request):
 
     return render(request, 'chart_demo.html', context)
 
+#Chart_customer_dashboard_order
+def chart_customer_dashboard_order(request):
+    orders = Order.objects.filter(customer=request.user).order_by('-id')[:5]
+    labels = []
+    data = []
+    for order in orders:
+        labels.append(order.id)
+        data.append(order.net_total)
+    context = {
+        'labels': labels,
+        'data': data,
+    }
+
+    return render(request, 'chart_customer_dashboard_order.html', context)
+
 
 #Sample methods
 def example_form(request):

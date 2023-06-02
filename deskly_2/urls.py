@@ -25,6 +25,9 @@ urlpatterns = [
     path('',include('order_app.urls') ),
     path('',include('product_app.urls') ),
     path('',include('report_app.urls') ),
+
+#Google Auth related
+    path('accounts/', include('allauth.urls')),
 ]
 
 if settings.DEBUG:

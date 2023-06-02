@@ -31,17 +31,29 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+#Default apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+#Google auth
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+
+    #Project apps
     'auth_app',
     'product_app',
     'order_app',
     'report_app',
+
 ]
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -148,3 +160,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #Razorpay Payment Configuration
 KEY = 'rzp_test_WGlv594z1DLEPO'
 SECRET = 'rSzkwzdBivOZmQK0xu4q3UeD'
+
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': '25014805493-0ci9d3qsdr2iuekfmtaj3g8ohhpdmqd7.apps.googleusercontent.com',
+            'secret': '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',
+            'key': ''
+        }
+    }
+}
+
+LOGIN_REDIRECT_URL = 'home'
