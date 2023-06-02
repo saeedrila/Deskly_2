@@ -8,6 +8,7 @@ from django.utils.timezone import now
 from django.core.paginator import Paginator
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
 
 import razorpay
 
@@ -34,121 +35,31 @@ def cart(request):
 
 def checkout_address(request):
     if request.method == 'POST':
-        name = request.POST.get('name')
-        email = request.POST.get('email')
-        address1 = request.POST.get('address1')
-        customer = request.user
-
-        address = Address.objects.create(customer=customer, name=name, email=email, line_1=address1)
-
+        selected_address_id = request.POST.get('selected_address')
+        if selected_address_id:
+            address = Address.objects.get(id=selected_address_id)
+        else:
+            name = request.POST.get('name')
+            email = request.POST.get('email')
+            address1 = request.POST.get('address1')
+            customer = request.user
+            address = Address.objects.create(customer=customer, name=name, email=email, line_1=address1)
         return redirect('checkout_payment', address_id=address.id)
-    
-    cart_items = CartItem.objects.filter(customer=request.user).order_by('id')
+    else:
+        cart_items = CartItem.objects.filter(customer=request.user).order_by('id')
+        for item in cart_items:
+            item.subtotal = Decimal(item.product.mrp) * item.quantity
+        total = sum((Decimal(item.subtotal) for item in cart_items))
+        
+        addresses = Address.objects.filter(customer=request.user).order_by('-id')
 
-    for item in cart_items:
-        item.subtotal = Decimal(item.product.mrp) * item.quantity
-    
-    total = sum((Decimal(item.subtotal) for item in cart_items))
-    
-    context = {
-        'cart_items': cart_items,
-        'total': total,
-    }
-    return render(request, "checkout_address.html", context)
-
-def razorpay_demo(request):
-    if request.method == "POST":
-        name = request. POST .get ("name")
-        amount = int(request.POST. get ("amount")) * 100
-        client = razorpay.Client(auth =("rzp_test_WGlv594z1DLEPO","rSzkwzdBivOZmQK0xu4q3UeD"))
-        payment = client.order.create ({'amount' : amount, 'currency': 'INR', 'payment_capture': '1'})
-        print(payment)
-        purchase = RazorpayDemo(name = name , amount=amount, payment_id = payment ['id' ])
-        purchase.save()
         context = {
-            'payment': payment
+            'cart_items': cart_items,
+            'total': total,
+            'addresses': addresses
         }
-        return render(request, "razorpay_demo.html", context)
-    
-    context={}
-    return render(request, "razorpay_demo.html", context)
+        return render(request, "checkout_address.html", context)
 
-@csrf_exempt
-def success(request):
-    if request.method =="POST":
-        a = request.POST
-        for key, val in a.items():
-            if key == 'razorpay_order_id':
-                order_id = val
-                break
-        print('***********')
-        print(a)
-        print('***********')
-        print(order_id)
-        order = RazorpayDemo.objects.get(payment_id = order_id)
-        order.paid = True
-        order.save()
-    return render(request, "success.html")
-
-# def razorpay_demo(request, address_id=1):
-#     net_total = 320
-#     address = Address.objects.get(id=address_id)
-#     product = Product.objects.get(id=1)
-#     cart_items = CartItem.objects.get(id=61)
-#     quantity = 10
-#     client = razorpay.Client(auth=(settings.KEY, settings.SECRET))
-#     app_details = {
-#         "title": "Deskly",
-#         "version": "1.0.1"
-#     }
-#     client.set_app_details(app_details)
-
-#     if request.method == 'POST':
-#         print("Entered POST method")
-#         payment_option = 'payment_option'
-#         order = Order(
-#             customer=request.user,
-#             address=address,
-#             product=product,
-#             quantity=quantity,
-#             payment=payment_option,
-#             date=now(),
-#             status='Pending',
-#             net_total=net_total,
-#         )
-#         order.save()
-
-#         amount = 32000
-#         payment = client.order.create({"amount": amount, "currency": "INR", "receipt": "order_rcptid_11"})
-#         response = client.order.create(data = payment)
-
-#         print('********** Razorpay Integration **********')
-#         print('Client:', client)
-#         print('Amount:', amount)
-#         print('Payment:', payment)
-#         print('Response:', response)
-#         print('*******************************************')
-
-#         if 'id' in response:
-#             order.razorpay_order_id = response['id']
-#             order.save()
-
-#             context = {
-#                 'cart': order,
-#                 'net_total': net_total,
-#                 'payment': payment
-#             }
-#             messages.success(request, "Payment successful!")
-#         else:
-#             messages.error(request, "Error creating Razorpay order: {}".format(response.get('error')))
-
-#     context = {
-#         'cart_items': cart_items,
-#         'total': net_total,
-#         'net_total': net_total,
-#         'address': address,
-#     }
-#     return render(request, "razorpay_demo.html", context)
 
 def deskly_razorpay(request, order_id=1):
     try:
@@ -159,6 +70,7 @@ def deskly_razorpay(request, order_id=1):
         'order': order
     }
     return render(request, "razorpay_demo.html", context)
+
 
 def checkout_payment(request, address_id=1):
     cart_items = CartItem.objects.filter(customer=request.user).order_by('id')
@@ -270,85 +182,6 @@ def thank_you(request):
         return render(request, "thank_you.html")
     return render(request, "thank_you.html")
 
-# Old codes
-# def checkout_payment(request, address_id=1):
-#     cart_items = CartItem.objects.filter(customer=request.user).order_by('id')
-#     subtotal = 0
-#     net_total = 0
-#     total = 0
-
-#     for item in cart_items:
-#         item.subtotal = Decimal(item.product.mrp) * item.quantity
-#         total = sum((Decimal(item.subtotal) for item in cart_items))
-        
-#     shipping = 0
-#     net_total = total+shipping
-
-#     try:
-#         address = Address.objects.get(id=address_id)
-#     except Address.DoesNotExist:
-#         address = None
-
-#     if request.method == 'POST':
-#         form = PaymentForm(request.POST)
-#         if form.is_valid():
-#             payment_option = form.cleaned_data['payment_option']
-#             if payment_option == 'cod' or payment_option == 'razorpay':
-#                 for item in cart_items:
-#                     product = item.product
-#                     quantity = item.quantity
-#                     subtotal = Decimal(product.mrp) * quantity
-#                     net_total = subtotal
-#                     order = Order(
-#                         customer=request.user,
-#                         address=address,
-#                         product=product,
-#                         quantity=quantity,
-#                         payment=payment_option,
-#                         date=now(),
-#                         status='Pending',
-#                         net_total = net_total,
-#                     )
-#                 cart_items.delete()
-#                 if payment_option == 'cod':
-#                     order.save()
-#                     return redirect('thank_you')
-#                 else:
-#                     client = razorpay.Client(auth = (settings.KEY, settings.SECRET))
-#                     payment = {"amount": int(net_total * 100), "currency": "INR", "receipt": "order_rcptid_11"}
-#                     order.razorpay_order_id = payment['id']
-#                     order.save()
-
-#                     print('**********')
-#                     print(payment)
-#                     print('**********')
-
-#                     context ={
-#                         'cart': order,
-#                         'net_total': net_total,
-#                         'payment': payment
-#                     }
-#                     messages.success(request, )
-#             else:
-#                 messages.error(request, "The selected payment option is not available now. Please choose another option.")
-#         else:
-#             for field in form:
-#                 for error in field.errors:
-#                     messages.error(request, error)
-#     else:
-#         form = PaymentForm()
-#         form.request = request
-
-#     context = {
-#         'cart_items': cart_items,
-#         'total': total,
-#         'net_total': net_total,
-#         'form': form,
-#         'address': address,
-#     }
-#     return render(request, "checkout_payment.html", context)
-
-
 
 def add_to_cart(request, product_id):
     try:
@@ -449,8 +282,18 @@ def get_cart_count(request):
 @never_cache
 def order_dashboard(request):
     if request.session.get('is_admin'):
+        search_query = request.GET.get('search')
         orders = Order.objects.order_by('-id')
-        paginator = Paginator(orders, 4)  # Change the number of items per page as needed
+
+        if search_query:
+            orders = orders.filter(
+                Q(customer__username__icontains=search_query) |
+                Q(product__name__icontains=search_query) |
+                Q(payment__icontains=search_query) |
+                Q(address__line_1__icontains=search_query)
+            )
+        per_page = int(request.GET.get('entries', 5))
+        paginator = Paginator(orders, per_page)  # Change the number of items per page as needed
         page_number = request.GET.get('page')
         page = paginator.get_page(page_number)
         context = {
@@ -519,86 +362,37 @@ def coupon_dashboard(request):
     # else:
     #     return redirect("admin_login")
 
-
-
-
-# Codes from Afif
-# @never_cache
-# def cart(request):
-#     user = request.user
-#     cart_items = Cart.objects.filter(user=user)
+# Test methods
+def razorpay_demo(request):
+    if request.method == "POST":
+        name = request. POST .get ("name")
+        amount = int(request.POST. get ("amount")) * 100
+        client = razorpay.Client(auth =("rzp_test_WGlv594z1DLEPO","rSzkwzdBivOZmQK0xu4q3UeD"))
+        payment = client.order.create ({'amount' : amount, 'currency': 'INR', 'payment_capture': '1'})
+        print(payment)
+        purchase = RazorpayDemo(name = name , amount=amount, payment_id = payment ['id' ])
+        purchase.save()
+        context = {
+            'payment': payment
+        }
+        return render(request, "razorpay_demo.html", context)
     
-#     cart_items = cart_items.annotate(item_total=F('quantity') * F('product__price'))
-    
-    
-#     subtotal   = cart_items.aggregate(subtotal=Sum('item_total'))['subtotal']
+    context={}
+    return render(request, "razorpay_demo.html", context)
 
-   
-#     for cart_item in cart_items:
-#         cart_item.total_price = cart_item.item_total
-#         cart_item.save()
-#     shipping_cost = 10 
-    
-#     total = subtotal + shipping_cost if subtotal else 0
-    
-#     context = {
-#         'cart_items': cart_items,
-#         'subtotal'  : subtotal,
-#         'total'     : total,
-#     }
-#     return render(request, 'cart.html', context)
-
-
-# @never_cache
-# def add_to_cart(request, product_id):
-#     try:
-#         product = Product.objects.get(id=product_id)
-#     except Product.DoesNotExist:
-#         return redirect('product_not_found')
-
-#     quantity = request.POST.get('quantity')
-
-#     if not quantity:
-#         quantity = 1
-
-#     cart, created = Cart.objects.get_or_create(
-#         product=product,
-#         user=request.user,
-#         defaults={'quantity': 0}
-#     )
-
-#     cart.quantity += quantity
-#     cart.save()
-
-#     return redirect('cart')
-
-# @never_cache
-# def remove_from_cart(request, cart_item_id):
-#     try:
-#         cart_item = Cart.objects.get(id=cart_item_id, user=request.user)
-#         cart_item.delete()
-#     except Cart.DoesNotExist:
-#         pass
-    
-#     return redirect('cart')
-
-
-# @never_cache
-# def checkout(request):
-#     user = request.user
-#     cart_items = Cart.objects.filter(user=user)
-    
-#     cart_items = cart_items.annotate(item_total=F('quantity') * F('product__price'))
-    
-#     subtotal = cart_items.aggregate(subtotal=Sum('item_total'))['subtotal']
-
-#     shipping_cost = 10 
-    
-#     total = subtotal + shipping_cost if subtotal else 0
-    
-#     context = {
-#         'cart_items': cart_items,
-#         'subtotal': subtotal,
-#         'total': total,
-#     }
-#     return render(request, 'checkout.html', context)
+@csrf_exempt
+def success(request):
+    if request.method =="POST":
+        a = request.POST
+        for key, val in a.items():
+            if key == 'razorpay_order_id':
+                order_id = val
+                break
+        print('***********')
+        print(a)
+        print('***********')
+        print(order_id)
+        order = RazorpayDemo.objects.get(payment_id = order_id)
+        order.paid = True
+        order.save()
+    return render(request, "success.html")

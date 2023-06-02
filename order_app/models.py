@@ -45,9 +45,9 @@ class Order(models.Model):
     razorpay_payment_id         = models.CharField(max_length=100, null=True, blank=True)
     razorpay_payment_signature  = models.CharField(max_length=100, null=True, blank=True)
 
-
     def __str__(self):
-        return self.name
+        return str(self.id)
+
     
 class RazorpayDemo(models.Model):
     name = models.CharField(max_length=100)

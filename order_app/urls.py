@@ -19,7 +19,7 @@ urlpatterns = [
     path('checkout-address/', views.checkout_address, name='checkout_address'),
     path('checkout-payment/<int:address_id>/', views.checkout_payment, name='checkout_payment'),
 
-
+# Test paths
     path('deskly-razorpay/<int:address_id>/', views.deskly_razorpay, name='deskly_razorpay'),
     path('razorpay-demo', views.razorpay_demo, name='razorpay_demo'),
     path('success', views.success, name='success'),

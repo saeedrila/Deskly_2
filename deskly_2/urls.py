@@ -24,6 +24,7 @@ urlpatterns = [
     path('',include('auth_app.urls') ),
     path('',include('order_app.urls') ),
     path('',include('product_app.urls') ),
+    path('',include('report_app.urls') ),
 ]
 
 if settings.DEBUG:

@@ -44,10 +44,10 @@
                           <h6 class="fw-semibold mb-0">Id</h6>
                         </th>
                         <th class="border-bottom-0">
-                          <h6 class="fw-semibold mb-0">Name</h6>
+                          <h6 class="fw-semibold mb-0">Image</h6>
                         </th>
                         <th class="border-bottom-0">
-                          <h6 class="fw-semibold mb-0">Image</h6>
+                          <h6 class="fw-semibold mb-0">Name</h6>
                         </th>
                         <th class="border-bottom-0">
                           <h6 class="fw-semibold mb-0">Action</h6>
@@ -59,13 +59,14 @@
                         <tr>
                             <td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{category.id}}</h6></td>
                             <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-1">{{category.name}}</h6>                        
+                                <h6 class="fw-semibold mb-1">
+                                    <img src="{{ category.image.url }}" alt="Product Image"  style="width: 50px; height: 50px;">
+                                </h6>                        
                             </td>
                             <td class="border-bottom-0">
-                              <h6 class="fw-semibold mb-1">
-                                  <img src="{{ category.image.url }}" alt="Product Image"  style="width: 50px; height: 50px;">
-                              </h6>                        
-                          </td>
+                                <h6 class="fw-semibold mb-1">{{category.name}}</h6>                        
+                            </td>
+
                           <td class="border-bottom-0">
                             <h6 class="fw-semibold mb-1"><a href="#">Edit</a></h6>                        
                         </td>

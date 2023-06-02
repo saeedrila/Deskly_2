@@ -66,6 +66,9 @@
                           <h6 class="fw-semibold mb-0">Id</h6>
                         </th>
                         <th class="border-bottom-0">
+                          <h6 class="fw-semibold mb-0">Image</h6>
+                        </th>
+                        <th class="border-bottom-0">
                           <h6 class="fw-semibold mb-0">Name</h6>
                         </th>
                         <th class="border-bottom-0">
@@ -92,9 +95,7 @@
                           <th class="border-bottom-0">
                             <h6 class="fw-semibold mb-0">Date added</h6>
                           </th>
-                          <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0">Image</h6>
-                          </th>
+
                           <th class="border-bottom-0">
                             <h6 class="fw-semibold mb-0">Action</h6>
                           </th>
@@ -104,6 +105,11 @@
                       {% for product in products %}
                       <tr>
                           <td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{product.id}}</h6></td>
+                          <td class="border-bottom-0">
+                            <h6 class="fw-semibold mb-1">
+                                <img src="{{ product.image.url }}" alt="Product Image"  style="width: 50px; height: 50px;">
+                            </h6>                        
+                          </td>
                           <td class="border-bottom-0">
                               <h6 class="fw-semibold mb-1">{{product.name}}</h6>                        
                           </td>
@@ -132,11 +138,6 @@
                           </td>
                           <td class="border-bottom-0">
                               <h6 class="fw-semibold mb-1">{{product.date_added}}</h6>                        
-                          </td>
-                          <td class="border-bottom-0">
-                              <h6 class="fw-semibold mb-1">
-                                  <img src="{{ product.image.url }}" alt="Product Image"  style="width: 50px; height: 50px;">
-                              </h6>                        
                           </td>
                           <td class="border-bottom-0">
                               <h6 class="fw-semibold mb-1"><a href="{% url 'edit_product' product.id %}">Edit</a></h6>                        
