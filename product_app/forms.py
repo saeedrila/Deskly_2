@@ -17,10 +17,20 @@ class SubCategoryForm(forms.ModelForm):
             'name': forms.Select(attrs={'id': 'id_subcategory'}),
         }
 
+from multiupload.fields import MultiFileField
+
 class ProductForm(forms.ModelForm):
+    image_files = MultiFileField(
+        label='Product Images',
+        required=False,
+        max_num=5,
+        max_file_size=1024 * 1024 * 5,  # 5MB
+        min_num=1,
+    )
+    
     class Meta:
         model = Product
-        fields = ['name', 'brand', 'description', 'category', 'sub_category', 'mrp', 'image', 'sell_count', 'availability', 'stock']
+        fields = ['name', 'brand', 'description', 'category', 'sub_category', 'mrp', 'sell_count', 'availability', 'stock']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.TextInput(attrs={'class': 'form-control'}),
@@ -28,15 +38,16 @@ class ProductForm(forms.ModelForm):
             'category': forms.Select(attrs={'class': 'form-control', 'id': 'category'}),
             'sub_category': forms.Select(attrs={'class': 'form-control', 'id': 'subcategory'}),
             'mrp': forms.TextInput(attrs={'class': 'form-control'}),
-            'image': forms.FileInput(attrs={'class': 'form-control'}),
             'sell_count': forms.TextInput(attrs={'class': 'form-control'}),
             'availability': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'stock': forms.TextInput(attrs={'class': 'form-control'}),
         }
+
         def __init__(self, *args, **kwargs):
             super(ProductForm, self).__init__(*args, **kwargs)
             self.fields['category'].empty_label = 'Select a category'
             self.fields['sub_category'].empty_label = 'Select a subcategory'
+
 
 class ExampleForm(forms.Form):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Name', 'class': 'form-control'}))

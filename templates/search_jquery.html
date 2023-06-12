@@ -1,0 +1,117 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Search-jquery</title>
+    {% include 'snippets/dependencies_customer_header.html' %}
+</head>
+<body>
+    <div class="container">
+        <div class="col-md-6 mx-auto">
+            <div id="autocomplete" class="autocomplete">
+                <input id="autocomplete-input" class="form-control autocomplete-input" placeholder="Search" />
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    $( function() {
+        $( "#autocomplete-input" ).autocomplete({
+            source: "{% url 'get_suggestion' %}",
+            appendTo: "#autocomplete", // Append the dropdown menu to the autocomplete container
+            autoFocus: true, // Automatically focus the first item in the dropdown menu
+        }).autocomplete( "widget" ).addClass( "autocomplete-result-list" ); // Add custom class for the dropdown menu
+    } );
+</script>
+<script>
+    function addToCart(productId) {
+      var csrfToken = getCookie('csrftoken'); // Function to retrieve the CSRF token from cookies
+  
+      fetch('/add-to-cart/' + productId + '/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken // Include the CSRF token in the request headers
+        },
+        credentials: 'same-origin', // Include cookies in the request if needed
+        body: JSON.stringify({}) // Empty request body or you can include additional data if required
+      })
+      .then(function(response) {
+        return response.json(); // Parse the response as JSON
+      })
+      .then(function(data) {
+        // Handle the response data here
+        console.log(data.message); // Log the message to the console or display it on the page
+  
+        // You can perform any additional actions based on the response, such as updating the UI
+      })
+      .catch(function(error) {
+        // Handle any error that occurred during the request
+        console.error('Error:', error);
+      });
+    }
+  
+    // Function to retrieve the CSRF token from cookies
+    function getCookie(name) {
+      var cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+          var cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+</script>
+<script>
+    function addToWishList(productId) {
+      var csrfToken = getCookie('csrftoken'); // Function to retrieve the CSRF token from cookies
+    
+      fetch('/add-to-wish-list/' + productId + '/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken // Include the CSRF token in the request headers
+        },
+        credentials: 'same-origin', // Include cookies in the request if needed
+        body: JSON.stringify({}) // Empty request body or you can include additional data if required
+      })
+      .then(function(response) {
+        return response.json(); // Parse the response as JSON
+      })
+      .then(function(data) {
+        // Handle the response data here
+        console.log(data.message); // Log the message to the console or display it on the page
+    
+        // You can perform any additional actions based on the response, such as updating the UI
+      })
+      .catch(function(error) {
+        // Handle any error that occurred during the request
+        console.error('Error:', error);
+      });
+    }
+    
+    // Function to retrieve the CSRF token from cookies
+    function getCookie(name) {
+      var cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+          var cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+</script>
+{% include 'snippets/dependencies_customer_footer.html' %}
+</html>

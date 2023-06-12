@@ -5,16 +5,7 @@
     <title>Customer Account</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mukta:300,400,700"> 
-    <link rel="stylesheet" href="{% static 'fonts/icomoon/style.css' %}">
-    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}">
-    <link rel="stylesheet" href="{% static 'css/jquery-ui.css' %}">
-    <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/owl.theme.default.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/aos.css' %}">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'modernize/css/styles.min.css' %}" />
+    {% include 'snippets/dependencies_customer_header.html' %}
 </head>
 <body>
     <div class="site-wrap">
@@ -49,7 +40,7 @@
                                                         <p class="fs-3 mb-0">Email: {{address.email}}</p>
                                                         </div>
                                                         <div class="d-flex align-items-center mb-3">
-                                                        <p class="fs-3 mb-0">Addrds Line-1: {{address.line_1}}</p>
+                                                        <p class="fs-3 mb-0">Address Line-1: {{address.line_1}}</p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -59,7 +50,7 @@
                                         {% endfor %}
                                         </div>
                                     </div>
-                                    <button href="{% url 'customer_address_edit' %}" type="submit" class="btn btn-primary">Add New Address</button>
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAddressModal">Add New Address</button>
                                 </div>
                             </div>
                         </div>
@@ -75,14 +66,46 @@
     </div>
     {%include 'snippets/admin_scripts.html'%}
 
-
-    <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
-    <script src="{% static 'js/jquery-ui.js' %}"></script>
-    <script src="{% static 'js/popper.min.js' %}"></script>
-    <script src="{% static 'js/bootstrap.min.js' %}"></script>
-    <script src="{% static 'js/owl.carousel.min.js' %}"></script>
-    <script src="{% static 'js/jquery.magnific-popup.min.js' %}"></script>
-    <script src="{% static 'js/aos.js' %}"></script>
-    <script src="{% static 'js/main.js' %}"></script>
+    <div class="modal fade" id="addAddressModal" tabindex="-1" aria-labelledby="addAddressModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+            </div>
+            <div class="modal-body">
+              <form action="{% url 'customer_address_add' %}" method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="name" class="form-label">Title:</label>
+                    <input type="text" class="form-control" id="name" name="title" required>
+                  </div>
+                <div class="mb-3">
+                  <label for="name" class="form-label">Name:</label>
+                  <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+                <div class="mb-3">
+                  <label for="email" class="form-label">Email:</label>
+                  <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="mb-3">
+                  <label for="address" class="form-label">Address Line-1:</label>
+                  <input type="text" class="form-control" id="address" name="line_1" required>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <button type="submit" class="btn btn-primary">Add Address</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+    </div>
+    <script>
+        var addAddressModal = document.getElementById('addAddressModal');
+        addAddressModal.addEventListener('show.bs.modal', function (event) {
+          var form = addAddressModal.querySelector('form');
+          form.reset();
+        });
+    </script>
+    {% include 'snippets/dependencies_customer_footer.html' %}
 </body>
 </html>

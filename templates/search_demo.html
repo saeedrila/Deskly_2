@@ -14,7 +14,7 @@
     <div class="container">
         <div class="col-md-6 mx-auto">
             <div id="autocomplete" class="autocomplete">
-                <input class="autocomplete-input" />
+                <input id="autocomplete-input" class="autocomplete-input"/>
                 <ul class="autocomplete-result-list"></ul>
             </div>
         </div>
@@ -34,27 +34,28 @@
               });
             },
             renderResult: (result, props) => {
-              console.log(props);
-              let group = '';
-              if (result && result.index % 3 === 0) {
-                group = '<li class="group">Group</li>';
-              }
-              const name = result && result.name ? result.name : '';
-          
-              return `
-                ${group}
-                <li ${props} onclick="selectItem('${name}')">
-                  <div class="wiki-title">
-                    ${name}
-                  </div>
-                </li>`;
+                console.log(props);
+                let group = '';
+                if (result && result.index % 3 === 0) {
+                    group = '<li class="group">Group</li>';
+                }
+                const name = result && result.name ? result.name : '';
+
+                return `
+                    ${group}
+                    <li ${props} onclick="selectItem('${name}')">
+                    <div class="wiki-title">
+                        ${name}
+                    </div>
+                    </li>`;
             }  
         });
-
         const selectItem = (value) => {
-            const inputField = document.querySelector('.autocomplete-input');
+            console.log(value);
+            console.log(JSON.stringify(value));
+            const inputField = document.querySelector('#autocomplete-input');
             inputField.value = value;
-            autocomplete.clearResults(); // Clear the results after selecting an item
+            autocomplete.clearResults();
         };
     </script>
 </body>

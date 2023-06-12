@@ -5,16 +5,7 @@
     <title>Customer Account</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mukta:300,400,700"> 
-    <link rel="stylesheet" href="{% static 'fonts/icomoon/style.css' %}">
-    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}">
-    <link rel="stylesheet" href="{% static 'css/jquery-ui.css' %}">
-    <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/owl.theme.default.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/aos.css' %}">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'modernize/css/styles.min.css' %}" />
+    {% include 'snippets/dependencies_customer_header.html' %}
 </head>
 <body>
     <div class="site-wrap">
@@ -81,7 +72,13 @@
                                             <div class="col-sm-9 form-label">{{account.is_verified}}</div>
                                         </div>
                                     </div>
-                                    <button type="submit" class="btn btn-primary">Edit Details</button>
+
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@mdo">Edit Details</button>
+                                    {% if messages %}
+                                    {% for message in messages %}
+                                        <div class="alert alert-success">{{ message }}</div>
+                                    {% endfor %}
+                                    {% endif %} 
                                 </div>
                             </div>
                         </div>
@@ -92,14 +89,57 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Edit Profile</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form method="POST" action="{% url 'customer_account_edit' %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                  <label for="username" class="form-label">Username</label>
+                  <input type="text" class="form-control" id="username" name="username" value="{{ request.user.username }}" required>
+                </div>
+                <div class="mb-3">
+                  <label for="firstName" class="form-label">First Name</label>
+                  <input type="text" class="form-control" id="firstName" name="first_name" value="{{ request.user.first_name }}" required>
+                </div>
+                <div class="mb-3">
+                  <label for="lastName" class="form-label">Last Name</label>
+                  <input type="text" class="form-control" id="lastName" name="last_name" value="{{ request.user.last_name }}" required>
+                </div>
+                <div class="mb-3">
+                  <label for="email" class="form-label">Email</label>
+                  <input type="email" class="form-control" id="email" name="email" value="{{ request.user.email }}" required>
+                </div>
+                <div class="mb-3">
+                  <label for="mobile" class="form-label">Mobile</label>
+                  <input type="text" class="form-control" id="mobile" name="mobile" value="{{ request.user.mobile }}" required>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                  <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      
     {%include 'snippets/admin_scripts.html'%}
-    <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
-    <script src="{% static 'js/jquery-ui.js' %}"></script>
-    <script src="{% static 'js/popper.min.js' %}"></script>
-    <script src="{% static 'js/bootstrap.min.js' %}"></script>
-    <script src="{% static 'js/owl.carousel.min.js' %}"></script>
-    <script src="{% static 'js/jquery.magnific-popup.min.js' %}"></script>
-    <script src="{% static 'js/aos.js' %}"></script>
-    <script src="{% static 'js/main.js' %}"></script>
+    <script>
+        var exampleModal = document.getElementById('exampleModal');
+        exampleModal.addEventListener('show.bs.modal', function (event) {
+          var button = event.relatedTarget;
+          var modalTitle = exampleModal.querySelector('.modal-title');
+          
+          modalTitle.textContent = 'Edit Profile';
+        });        
+    </script>
+    {% include 'snippets/dependencies_customer_footer.html' %}
 </body>
 </html>

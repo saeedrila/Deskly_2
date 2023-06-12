@@ -17,4 +17,11 @@
     ></script>
     <input type="hidden" custom="Hidden Element" name="hidden"/>
 </form>
+<script>
+    window.addEventListener('DOMContentLoaded', function() {
+        var paymentForm = document.querySelector('form[action="{% url 'thank_you' %}"]');
+        var button = paymentForm.querySelector('.razorpay-payment-button');
+        button.click();
+    });
+</script>
 {% endif %}

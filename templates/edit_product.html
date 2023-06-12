@@ -58,19 +58,22 @@
                           <div class="row mb-3">
                             <label class="col-sm-2 col-form-label" for="basic-default-name">Brand</label>
                             <div class="col-sm-10">
-                              <input type="text" class="form-control" id="basic-default-name"  value="{{product.brand_id_id}}" name="brand"/>
+                                <input type="hidden" name="brand" value="{{ product.brand_id }}">
+                                <input type="text" class="form-control" id="basic-default-name" value="{{ product.brand.name }}" readonly>
                             </div>
                           </div>
                           <div class="row mb-3">
                             <label class="col-sm-2 col-form-label" for="basic-default-name">Category</label>
                             <div class="col-sm-10">
-                              <input type="text" class="form-control" id="basic-default-name" value="{{product.category_id_id}}" name="category_id"/>
+                                <input type="hidden" name="category_id" value="{{ product.category_id }}">
+                                <input type="text" class="form-control" id="basic-default-name" value="{{product.category.name}}" readonly>
                             </div>
                           </div>
                           <div class="row mb-3">
                             <label class="col-sm-2 col-form-label" for="basic-default-name">Sub-category</label>
                             <div class="col-sm-10">
-                              <input type="text" class="form-control" id="basic-default-name" value="{{product.sub_category_id_id}}" name="sub_category_id"/>
+                                <input type="hidden" name="sub_category_id" value="{{ product.sub_category_id }}">
+                                <input type="text" class="form-control" id="basic-default-name" value="{{product.sub_category.name}}" readonly>
                             </div>
                           </div>
                           <div class="row mb-3">

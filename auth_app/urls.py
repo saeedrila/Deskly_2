@@ -14,12 +14,8 @@ urlpatterns = [
     path('admin-dashboard',views.admin_dashboard, name='admin_dashboard'),
     path('customer-dashboard',views.customer_dashboard, name='customer_dashboard'),
 
-
     path('ad-template',views.ad_template, name='ad_template'),
     path('ad-edit-template',views.ad_edit_template, name='ad_edit_template'),
-
-
-
 
 #Customer account dashboard
     path('customer-account-dashboard',views.customer_account_dashboard, name='customer_account_dashboard'),

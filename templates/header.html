@@ -1,14 +1,5 @@
 {% load static %}
 <div class="site-navbar bg-white py-2">
-    <div class="search-wrap">
-        <div class="container">
-            <a href="#" class="search-close js-search-close"><span class="icon-close2"></span></a>
-            <form action="#" method="post">
-                <input type="text" class="form-control" placeholder="Search keyword and hit enter...">
-            </form>  
-        </div>
-    </div>
-
     <div class="container">
         <div class="d-flex align-items-center justify-content-between">
         <div class="logo">
@@ -54,8 +45,17 @@
             </ul>
             </nav>
         </div>
+        <div class="col-md-4">
+            <div id="autocomplete" class="autocomplete">
+                <form action="{% url 'shop_all' %}" method="get" class="search-form">
+                    <div class="input-group">
+                        <input id="autocomplete-input" type="text" name="search" class="form-control autocomplete-input" placeholder="Search" value="{{ request.GET.search }}">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                    </div>
+                </form>                
+            </div>
+        </div>
         <div class="icons">
-            <a href="#" class="icons-btn d-inline-block js-search-open"><span class="icon-search"></span></a>
             <a href="{% url 'wish_list' %}" class="icons-btn d-inline-block bag">
                 <span class="icon-heart-o"></span>
                 <span id="wishlist-count" class="number">0</span>
@@ -142,4 +142,14 @@
     
     // Call the updateCounts function initially to set the initial counts
     updateCounts();
+    </script>
+
+    <script>
+        $(function() {
+            $("#autocomplete-input").autocomplete({
+                source: "{% url 'get_suggestion' %}",
+                appendTo: "#autocomplete",
+                autoFocus: true,
+            }).autocomplete("widget").addClass("autocomplete-result-list");
+        });
     </script>

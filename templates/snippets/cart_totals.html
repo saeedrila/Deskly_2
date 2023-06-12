@@ -1,0 +1,30 @@
+<div class="row mb-3">
+    <div class="col-md-6">
+        <span class="text-black">Subtotal</span>
+    </div>
+    <div class="col-md-6 text-right">
+        <strong class="text-black">&#x20B9; {{total}}</strong>
+    </div>
+    <div class="col-md-6">
+        <span class="text-black">Shipping</span>
+    </div>
+    <div class="col-md-6 text-right">
+        <strong class="text-black">&#x20B9; 0</strong>
+    </div>
+    {% if coupon_discount != 0 %}
+    <div class="col-md-6">
+        <span class="text-black">Coupon discount</span>
+    </div>
+    <div class="col-md-6 text-right">
+        <strong class="text-black">&#x20B9; -{{coupon_discount}}</strong>
+    </div>
+    {% endif %}
+</div>
+<div class="row mb-5">
+    <div class="col-md-6">
+        <span class="text-black">Total</span>
+    </div>
+    <div class="col-md-6 text-right">
+        <strong class="text-black">&#x20B9; {{net_total}}</strong>
+    </div>
+</div>

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.views.decorators.cache import never_cache
-from django.http import Http404,JsonResponse
+from django.http import Http404,JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from decimal import Decimal
@@ -9,12 +9,15 @@ from django.core.paginator import Paginator
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
+import json
+from decimal import Decimal
 
 import razorpay
 
 from product_app.models import *
 from . models import *
 from . forms import PaymentForm
+from product_app.views import *
 
 
 # Cart and add to cart need modification
@@ -22,17 +25,67 @@ def cart(request):
     if not request.user.is_authenticated:
         return redirect("home")
     cart_items = CartItem.objects.filter(customer=request.user).order_by('id')
-
     for item in cart_items:
-        item.subtotal = Decimal(item.product.mrp) * item.quantity
-    
+        try:
+            product = Product.objects.get(id=item.product_id)
+            category_id = product.category_id
+            category_offers = CategoryOffer.objects.filter(category_id=category_id)[:1]
+
+            if category_offers.exists():
+                category_offer = category_offers[0]
+                discount_percentage = category_offer.discount_percentage
+                offer_product_price = round(product.mrp * (1 - discount_percentage / 100))
+                product.offer_product_price = offer_product_price
+                item.offer_product_price = offer_product_price
+            else:
+                pass
+        except Product.DoesNotExist:
+            pass
+        try:
+            item.subtotal = Decimal(item.offer_product_price) * item.quantity
+        except:
+            item.subtotal = Decimal(item.product.mrp) * item.quantity
     total = sum((Decimal(item.subtotal) for item in cart_items))
+
+    discount_percentage = 0
+    coupon_code = request.session.get('coupon_code')
+    if coupon_code:
+        try:
+            coupon = Coupon.objects.get(Q(coupon_code__iexact=coupon_code))
+            if coupon.is_active:
+                discount_percentage = coupon.discount_percentage
+        except Coupon.DoesNotExist:
+            pass
+
+    coupon_discount = round(total * Decimal(discount_percentage/100))
+    net_total = total - coupon_discount
     
     context = {
         'cart_items': cart_items,
         'total': total,
+        'coupon_discount': coupon_discount,
+        'net_total': net_total,
     }
     return render(request, 'cart.html', context)
+
+def verify_coupon(request):
+    if request.method == 'POST':
+        coupon_code = request.POST.get('coupon')
+        try:
+            coupon = Coupon.objects.get(Q(coupon_code__iexact=coupon_code))
+            if coupon.is_active:
+                request.session['coupon_code'] = coupon.coupon_code
+                message = 'Coupon code is valid'
+            else:
+                message = 'Invalid coupon code'
+        except Coupon.DoesNotExist:
+            message = 'Invalid coupon code'
+        return HttpResponse(message)
+
+def render_cart_totals(request):
+    context = {
+    }
+    return render(request, 'cart_totals.html', context)
 
 @never_cache
 def checkout_address(request):
@@ -50,15 +103,46 @@ def checkout_address(request):
     else:
         cart_items = CartItem.objects.filter(customer=request.user).order_by('id')
         for item in cart_items:
-            item.subtotal = Decimal(item.product.mrp) * item.quantity
+            try:
+                product = Product.objects.get(id=item.product_id)
+                category_id = product.category_id
+                category_offers = CategoryOffer.objects.filter(category_id=category_id)[:1]
+
+                if category_offers.exists():
+                    category_offer = category_offers[0]
+                    discount_percentage = category_offer.discount_percentage
+                    offer_product_price = round(product.mrp * (1 - discount_percentage / 100))
+                    product.offer_product_price = offer_product_price
+                    item.offer_product_price = offer_product_price
+                else:
+                    pass
+            except Product.DoesNotExist:
+                pass
+            try:
+                item.subtotal = Decimal(item.offer_product_price) * item.quantity
+            except:
+                item.subtotal = Decimal(item.product.mrp) * item.quantity
         total = sum((Decimal(item.subtotal) for item in cart_items))
-        
+        discount_percentage = 0
+        coupon_code = request.session.get('coupon_code')
+        if coupon_code:
+            try:
+                coupon = Coupon.objects.get(Q(coupon_code__iexact=coupon_code))
+                if coupon.is_active:
+                    discount_percentage = coupon.discount_percentage
+            except Coupon.DoesNotExist:
+                pass
+
+        coupon_discount = round(total * Decimal(discount_percentage/100))
+        net_total = total - coupon_discount
         addresses = Address.objects.filter(customer=request.user).order_by('-id')
 
         context = {
             'cart_items': cart_items,
             'total': total,
-            'addresses': addresses
+            'addresses': addresses,
+            'coupon_discount': coupon_discount,
+            'net_total': net_total,
         }
         return render(request, "checkout_address.html", context)
 
@@ -76,9 +160,40 @@ def deskly_razorpay(request, order_id=1):
 @never_cache
 def checkout_payment(request, address_id=1):
     cart_items = CartItem.objects.filter(customer=request.user).order_by('id')
-    total = sum(Decimal(item.product.mrp) * item.quantity for item in cart_items)
+    for item in cart_items:
+        try:
+            product = Product.objects.get(id=item.product_id)
+            category_id = product.category_id
+            category_offers = CategoryOffer.objects.filter(category_id=category_id)[:1]
+
+            if category_offers.exists():
+                category_offer = category_offers[0]
+                discount_percentage = category_offer.discount_percentage
+                offer_product_price = round(product.mrp * (1 - discount_percentage / 100))
+                product.offer_product_price = offer_product_price
+                item.offer_product_price = offer_product_price
+            else:
+                pass
+        except Product.DoesNotExist:
+            pass
+        try:
+            item.subtotal = Decimal(item.offer_product_price) * item.quantity
+        except:
+            item.subtotal = Decimal(item.product.mrp) * item.quantity
+    total = sum((Decimal(item.subtotal) for item in cart_items))
     shipping = 0
-    net_total = total + shipping
+    discount_percentage = 0
+    coupon_code = request.session.get('coupon_code')
+    if coupon_code:
+        try:
+            coupon = Coupon.objects.get(Q(coupon_code__iexact=coupon_code))
+            if coupon.is_active:
+                discount_percentage = coupon.discount_percentage
+        except Coupon.DoesNotExist:
+            pass
+
+    coupon_discount = round(total * Decimal(discount_percentage/100))
+    net_total = total + shipping - coupon_discount
     print('**********')
     print(net_total)
     print('**********')
@@ -88,32 +203,60 @@ def checkout_payment(request, address_id=1):
         address = Address.objects.get(id=address_id)
     except Address.DoesNotExist:
         address = None
-
     if request.method == 'POST':
         form = PaymentForm(request.POST)
         if form.is_valid():
             payment_option = form.cleaned_data['payment_option']
             if payment_option in ['cod', 'razorpay']:
+                order = Order(
+                    customer=request.user,
+                    address=address,
+                    payment=payment_option,
+                    date=now(),
+                    status='Pending',
+                    net_total=0,
+                )
+                order.save()
+                net_total = 0
+
                 for item in cart_items:
                     product = item.product
                     quantity = item.quantity
                     subtotal = Decimal(product.mrp) * quantity
-                    net_total = subtotal
+                    net_total += subtotal
 
-                    order = Order(
-                        customer=request.user,
-                        address=address,
+                    order_item = OrderItem(
+                        order=order,
                         product=product,
                         quantity=quantity,
-                        payment=payment_option,
-                        date=now(),
-                        status='Pending',
-                        net_total=net_total,
                     )
-                    order.save()
+                    order_item.save()
+                    product.stock -= quantity
+                    product.sell_count += quantity
+                    product.save()
+                #Coupon discount on net_total
+                discount_percentage = 0
+                coupon_code = request.session.get('coupon_code')
+                if coupon_code:
+                    try:
+                        coupon = Coupon.objects.get(Q(coupon_code__iexact=coupon_code))
+                        if coupon.is_active:
+                            discount_percentage = coupon.discount_percentage
+                    except Coupon.DoesNotExist:
+                        pass
+
+                coupon_discount = round(total * Decimal(discount_percentage/100))
+                net_total = total - coupon_discount
+
+                order.net_total = net_total
+                order.save()
 
                 cart_items.delete()
-
+                #delete coupon from session
+                try:
+                    del request.session['coupon_code']
+                except:
+                    pass
                 if payment_option == 'cod':
                     return redirect('thank_you')
                 else:
@@ -135,7 +278,6 @@ def checkout_payment(request, address_id=1):
                                 'net_total': net_total,
                                 'payment': payment
                             }
-                            messages.success(request, "Razorpay payment initiated")
                             return render(request, 'deskly_razorpay.html', context)
                         else:
                             messages.error(request, "Error creating Razorpay order: {}".format(payment.get('error')))
@@ -157,6 +299,7 @@ def checkout_payment(request, address_id=1):
     context = {
         'cart_items': cart_items,
         'total': total,
+        'coupon_discount': coupon_discount,
         'net_total': net_total,
         'form': form,
         'address': address,
@@ -202,7 +345,6 @@ def add_to_cart(request, product_id):
 
     return JsonResponse({'message': 'Product quantity updated in cart.'}, status=200)
 
-import json
 def update_cart(request, product_id):
     cart_item = get_object_or_404(CartItem, product_id=product_id, customer=request.user)
     try:
@@ -210,14 +352,23 @@ def update_cart(request, product_id):
         quantity = int(data.get('quantity'))
     except (json.JSONDecodeError, ValueError, TypeError):
         return JsonResponse({'message': 'Invalid quantity.'}, status=400)
-    
+
     if quantity < 1:
         return JsonResponse({'message': 'Quantity must be at least 1.'}, status=400)
+
+    product = cart_item.product
+    if product.stock < quantity:
+        return JsonResponse({'message': 'Only limited stock available.'}, status=400)
 
     cart_item.quantity = quantity
     cart_item.save()
 
     return JsonResponse({'message': 'Cart item updated.'}, status=200)
+
+def check_stock(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    stock_available = product.stock
+    return JsonResponse({'stock': stock_available})
 
 def remove_from_cart(request, product_id):
     # User authentication not added
@@ -288,23 +439,29 @@ def get_cart_count(request):
 def order_dashboard(request):
     if request.session.get('is_admin'):
         search_query = request.GET.get('search')
+        per_page = int(request.GET.get('entries', 5))
         orders = Order.objects.order_by('-id')
 
         if search_query:
             orders = orders.filter(
                 Q(customer__username__icontains=search_query) |
-                Q(product__name__icontains=search_query) |
+                Q(orderitem__product__name__icontains=search_query) |
                 Q(payment__icontains=search_query) |
                 Q(address__line_1__icontains=search_query)
             )
-        per_page = int(request.GET.get('entries', 5))
-        paginator = Paginator(orders, per_page)  # Change the number of items per page as needed
+
+        paginator = Paginator(orders, per_page)
         page_number = request.GET.get('page')
         page = paginator.get_page(page_number)
+
         context = {
             'messages': messages.get_messages(request),
-            'orders': page,  # Pass the paginated page object to the template
+            'orders': page,
+            'order_items': OrderItem.objects.select_related('product').filter(order__in=page),
+            'search_query': search_query,
+            'per_page': per_page,
         }
+
         return render(request, "order_dashboard.html", context)
     else:
         return redirect("admin_login")
@@ -362,11 +519,80 @@ def edit_customer(request, edit_id):
 def coupon_dashboard(request):
     # if request.session.get('is_admin'):
         context = {
-            'reviews': Product.objects.order_by('-id'),
+            'coupons': Coupon.objects.order_by('-id'),
         }
         return render(request, "coupon_dashboard.html", context)
     # else:
     #     return redirect("admin_login")
+
+#Coupon add modal method
+def coupon_add(request):
+    if request.method == "POST":
+        coupon_code = request.POST.get("coupon_code")
+        discount_percentage = request.POST.get("discount_percentage")
+        issued_quantity = request.POST.get("issued_quantity")
+        remaining_quantity = request.POST.get("remaining_quantity")
+        coupon = Coupon(coupon_code = coupon_code, discount_percentage = discount_percentage, 
+                issued_quantity = issued_quantity, remaining_quantity = remaining_quantity)
+        coupon.save()
+        messages.success(request, "Coupon successfully added")
+        return redirect(coupon_dashboard)
+    messages.error(request, "Coupon could not be added")
+    return redirect(coupon_dashboard)
+
+def coupon_edit(request, coupon_id):
+    if request.method == "POST":
+        coupon = Coupon.objects.get(id = coupon_id)
+        is_active = request.POST.get("is_active")
+        if is_active:
+            messages.success("Coupon has been activated successfully")
+        else:
+            messages.success("Coupon has been dectivated successfully")
+        coupon.is_active = is_active
+        coupon.save()
+        return redirect(coupon_dashboard)
+    return redirect(coupon_dashboard)
+
+@never_cache
+def banner_dashboard(request):
+    if request.session.get('is_admin'):
+        context = {
+            'reviews': Product.objects.order_by('-id'),
+        }
+        return render(request, "banner_dashboard.html", context)
+    else:
+        return redirect("admin_login")
+
+@never_cache
+def offer_dashboard(request):
+    if request.session.get('is_admin'):
+        context = {
+            'offers': CategoryOffer.objects.order_by('-id'),
+            'categories': Category.objects.order_by('-id'),
+        }
+        return render(request, "offer_dashboard.html", context)
+    else:
+        return redirect("admin_login")
+
+def offer_edit(request, offer_id):
+    pass
+
+#Category offer add modal method
+def offer_add(request):
+
+    if request.method == "POST":
+        category_id = request.POST.get("category")
+        category = get_object_or_404(Category, id=category_id)
+        discount_percentage = request.POST.get("discount_percentage")
+        offer = CategoryOffer(category = category, discount_percentage = discount_percentage)
+        offer.save()
+
+        messages.success(request, "Category offer successfully added")
+        return redirect(category_dashboard)
+    messages.error(request, "Coupon could not be added")
+    return redirect(category_dashboard)
+
+
 
 # Test methods
 def razorpay_demo(request):

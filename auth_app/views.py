@@ -9,6 +9,8 @@ from django.views.decorators.cache import never_cache
 import time
 from django.http import Http404, JsonResponse
 from django.core.paginator import Paginator
+from django.db.models import Q
+
 
 from . forms import RegistrationForm, AccountAuthenticationForm, AccountUpdateForm
 from . models import *
@@ -143,15 +145,21 @@ def customer_account(request):
         return redirect ('home')
     
 def customer_account_edit(request):
-    user = request.user
-    if user.is_authenticated:
-        account = request.user
-        context = {
-            'account': account,
-        }
-        return render(request, "customer_account_edit.html", context)
-    else:
-        return redirect ('home')
+    if request.method == 'POST':
+        user = request.user
+        if user.is_authenticated:
+            account = request.user
+            account.username = request.POST.get('username')
+            account.first_name = request.POST.get('first_name')
+            account.last_name = request.POST.get('last_name')
+            account.email = request.POST.get('email')
+            account.mobile = request.POST.get('mobile')
+            account.save()
+            messages.success(request, 'Your profile has been updated successfully.')
+            return redirect('customer_account')
+        else:
+            messages.error(request, 'You are not authenticated.')
+    return redirect('home')
 
 def customer_address(request):
     customer_addresses = Address.objects.filter(customer=request.user)
@@ -164,12 +172,14 @@ def customer_address(request):
 def customer_address_add(request):
     user = request.user
     if request.POST:
+        title = request.POST['title']
         name = request.POST['name']
         email = request.POST['email']
         line_1 = request.POST['line_1']
 
         address = Address()
         address.customer = user
+        address.title = title
         address.name = name
         address.email = email
         address.line_1 = line_1
@@ -198,11 +208,27 @@ def customer_address_edit(request, address_id):
     return render(request, "customer_address_add.html", context)
 
 def customer_orders(request):
+    search_query = request.GET.get('search')
     customer_orders = Order.objects.filter(customer=request.user).order_by('-id')
+
+    if search_query:
+        customer_orders = customer_orders.filter(
+            Q(customer__username__icontains=search_query) |
+            Q(product__name__icontains=search_query) |
+            Q(payment__icontains=search_query) |
+            Q(address__line_1__icontains=search_query)
+        )
+
+    per_page = int(request.GET.get('entries', 5))
+    paginator = Paginator(customer_orders, per_page)
+    page_number = request.GET.get('page')
+    page = paginator.get_page(page_number)
+
     if 'messages' in request.session:
         messages.success(request, request.session.pop('messages'))
+
     context = {
-        'orders': customer_orders,
+        'orders': page,
     }
     return render(request, "customer_orders.html", context)
 

@@ -3,31 +3,38 @@ from django.http import Http404, JsonResponse
 from django.views.decorators.cache import never_cache
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.db.models import Q
+from django.core.files.storage import default_storage
 
+#Multiple images, needed?
+from django.core.files.base import ContentFile
+from django.conf import settings
+import os
 
-from . forms import *
-
-def search_demo(request):
-    return render(request, 'search_demo.html')
-
-def get_names(request):
-    search = request.GET.get('search')
-    payload = []
-    if search:
-        objs = Names.objects.filter(name__icontains=search)
-        for obj in objs:
-            payload.append({
-                'name': obj.name
-            })
-    return JsonResponse(payload, safe=False)
-
+from .forms import *
+from order_app.models import *
 
 
 def shop_all(request):
-    context = {}
+    query = request.GET.get('search')
+    selected_categories = request.GET.getlist('category[]')
+    print('****************************')
+    print(selected_categories)
+    print('****************************')
     try:
-        context['products'] = Product.objects.all()
-        context['categories'] = Category.objects.all()
+        products = Product.objects.all()
+        if query:
+            products = products.filter(Q(name__icontains=query))
+        if selected_categories:
+            products = products.filter(category__id__in=selected_categories)
+
+
+        categories = Category.objects.all()
+        context = {
+            'products': products,
+            'categories': categories,
+            'selected_categories':selected_categories
+        }
     except Product.DoesNotExist:
         raise Http404("Product does not exist.")
     return render(request, "shop_all.html", context)
@@ -36,7 +43,22 @@ def shop_all(request):
 def product_page(request, product_id=None):
     context = {}
     try:
-        context['product'] = Product.objects.get(id = product_id)
+        product = Product.objects.get(id=product_id)
+        category_id = product.category_id
+        category_offers = CategoryOffer.objects.filter(category_id=category_id)[:1]
+        if category_offers.exists():
+            category_offer = category_offers[0]
+            discount_percentage = category_offer.discount_percentage
+            offer_product_price = round(product.mrp * (1 - discount_percentage / 100))
+            product.offer_product_price = offer_product_price
+            print("Category offer exists")
+        else:
+            print("No category offer found")
+        context['product'] = product
+    except Product.DoesNotExist:
+        print("Product does not exist")
+
+        
     except Product.DoesNotExist:
         raise Http404("Product does not exist.")
     return render(request, "product_page.html", context)
@@ -47,6 +69,10 @@ def add_product(request):
         product_form = ProductForm(request.POST, request.FILES)
         if product_form.is_valid():
             product = product_form.save()
+            image_files = request.FILES.getlist('image_files')
+            for image_file in image_files:
+                image = ProductImage.objects.create(product=product, image=image_file)
+                image.image.save(image_file.name, image_file)  # Save the image using Django's ImageField
             return redirect('product_dashboard')
     else:
         product_form = ProductForm()
@@ -55,20 +81,38 @@ def add_product(request):
     }
     return render(request, "add_product.html", context)
 
+
 @never_cache
 def product_dashboard(request):
     if request.session.get('is_admin'):
+        search_query = request.GET.get('search')
         products = Product.objects.order_by('-id')
-        paginator = Paginator(products, 4)
+        if products.exists():
+            first_product = products.first()
+            print("*****************************")
+            print(first_product.name)
+            print(first_product.brand.name)
+            for image in first_product.images.all():
+                print(image.image.url)
+            print("*****************************")
+        if search_query:
+            products = products.filter(
+                Q(name__icontains=search_query) |
+                Q(description__icontains=search_query)
+            )
+        per_page = int(request.GET.get('entries', 5))
+        paginator = Paginator(products, per_page)
         page_number = request.GET.get('page')
         page = paginator.get_page(page_number)
         context = {
             'messages': messages.get_messages(request),
-            'products': page, 
+            'products': page,
+            'first_product': first_product,  # Pass the first product to the context
         }
         return render(request, "product_dashboard.html", context)
     else:
         return redirect('admin_login')
+
 
 @never_cache
 def edit_product(request, edit_id=None):
@@ -127,6 +171,22 @@ def category_dashboard(request):
         return render(request, "category_dashboard.html", context)
     else:
         return redirect("admin_login")
+    
+def add_category(request):
+    if request.method == 'POST':
+        category_name = request.POST.get('category_name')
+        category_description = request.POST.get('category_description')
+        category_image = request.FILES.get('category_image')
+        category = Category(name=category_name, description=category_description)
+
+        filename = default_storage.get_available_name(category_image.name)
+        path = default_storage.save(filename, category_image)
+
+        category.image = path
+        category.save()
+        messages.success(request, 'New category has been created successfully.')
+        return redirect('category_dashboard')
+    return redirect('category_dashboard')
 
 
 @never_cache
@@ -140,25 +200,7 @@ def subcategory_dashboard(request):
         return redirect("admin_login")
 
 
-@never_cache
-def banner_dashboard(request):
-    if request.session.get('is_admin'):
-        context = {
-            'reviews': Product.objects.order_by('-id'),
-        }
-        return render(request, "banner_dashboard.html", context)
-    else:
-        return redirect("admin_login")
 
-@never_cache
-def offer_dashboard(request):
-    if request.session.get('is_admin'):
-        context = {
-            'offers': Product.objects.order_by('-id'),
-        }
-        return render(request, "offer_dashboard.html", context)
-    else:
-        return redirect("admin_login")
 
 
 #Dependent drop down menu
@@ -193,3 +235,30 @@ def category_model_form(request):
             'product_form': product_form,
         }
         return render(request, 'category_model_form.html', context)
+    
+#Search demo not working
+def search_demo(request):
+    return render(request, 'search_demo.html')
+
+def get_names(request):
+    search = request.GET.get('search')
+    payload = []
+    if search:
+        objs = Names.objects.filter(name__icontains=search)
+        for obj in objs:
+            payload.append({
+                'name': obj.name
+            })
+    return JsonResponse(payload, safe=False)
+
+#Working
+def search_jquery(request):
+    return render(request, 'search_jquery.html')
+
+def get_suggestion(request):
+    print(request)
+    request_query = request.GET.get('term')
+    queryset = Product.objects.filter(name__icontains=request_query)
+    my_list = []
+    my_list += [x.name for x in queryset]
+    return JsonResponse(my_list, safe=False)

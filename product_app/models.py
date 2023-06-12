@@ -1,6 +1,5 @@
 from django.db import models
 
-# Create your models here.
 class Category(models.Model):
 	name 				= models.CharField(max_length=50)
 	description 		= models.TextField()
@@ -32,16 +31,39 @@ class Product(models.Model):
 	description 		= models.CharField(max_length=100)
 	category	 		= models.ForeignKey(Category, on_delete=models.CASCADE)
 	sub_category	 	= models.ForeignKey(Subcategory, on_delete=models.CASCADE)
-	mrp 				= models.CharField(max_length=50)
+	mrp 				= models.PositiveIntegerField(default=0)
 	image 				= models.ImageField(upload_to='products')
 	availability 		= models.BooleanField(default=False)
-	stock 				= models.CharField(max_length=50)
-	sell_count			= models.CharField(max_length=10, default='0')
-	date_added			= models.DateTimeField(auto_now_add=True,)
-
+	stock 				= models.PositiveIntegerField(default=0)
+	sell_count			= models.PositiveIntegerField(default=0)
+	date_added			= models.DateTimeField(auto_now_add=True)
+	varient     		= models.CharField(max_length=20, default='Basic')
 
 	def __str__(self):
 		return self.name
+	
+class Subproduct(models.Model):
+    product         = models.ForeignKey(Product, related_name='subproducts', on_delete=models.CASCADE)
+    subproduct_id   = models.CharField(max_length=50)
+    mrp             = models.PositiveIntegerField(default=0)
+    stock           = models.PositiveIntegerField(default=0)
+    sell_count      = models.PositiveIntegerField(default=0)
+    varient      = models.CharField(max_length=20)
+
+    def __str__(self):
+        return f"Subproduct {self.subproduct_id} of {self.product.name}"
+    
+def product_image_upload_to(instance, filename):
+    product_name = instance.product.name.replace(' ', '_')
+    return f'products/{product_name}_{filename}'
+	
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)
+    image = models.ImageField(upload_to=product_image_upload_to)
+
+    def __str__(self):
+        return f"Image for {self.product.name}"
+
 	
 class Names(models.Model):
 	name = models.CharField(max_length=100)

@@ -36,104 +36,116 @@
                 <div class="card-body p-4">
                   <div class="table-responsive">
                     <div class="row mb-3">
-                        <div class="row">
-                            <div class="col-md-6">
-                              <form class="form-inline d-flex" method="GET" action="{% url 'order_dashboard' %}">
+                      <div class="row">
+                        <div class="col-md-6">
+                            <form class="form-inline d-flex" method="GET" action="{% url 'order_dashboard' %}">
                                 <div class="form-group">
-                                  <input type="text" class="form-control" name="search" placeholder="Search...">
+                                  <input type="text" class="form-control" name="search" placeholder="Search..." {% if search_query %}value="{{ search_query }}"{% endif %}>
                                 </div>
                                 <button type="submit" class="btn btn-primary ml-2">Search</button>
                               </form>
+                                                                                       
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                          <form class="d-flex" method="GET" action="{% url 'order_dashboard' %}">
+                            <div class="d-flex align-items-center">
+                              <label for="entries" class="form-label p-2">Entries:</label>
+                              <select class="form-select" id="entries" name="entries" onchange="this.form.submit()">
+                                <option value="5" {% if per_page == 5 %}selected{% endif %}>5 Per page</option>
+                                <option value="10" {% if per_page == 10 %}selected{% endif %}>10 Per page</option>
+                                <option value="20" {% if per_page == 20 %}selected{% endif %}>20 Per page</option>
+                                <option value="50" {% if per_page == 50 %}selected{% endif %}>50 Per page</option>
+                              </select>
                             </div>
-                            <div class="col-md-6 text-md-end">
-                              <form class="d-flex"method="GET" action="{% url 'order_dashboard' %}">
-                                <div class="d-flex align-items-center">
-                                <label for="entries" class="form-label p-2 ">Entries:</label>
-                                    <select class="form-select" id="entries" name="entries" onchange="this.form.submit()">
-                                        <option value="5" {% if orders.paginator.per_page == 5 %}selected{% endif %}>5 Per page</option>
-                                        <option value="10" {% if orders.paginator.per_page == 10 %}selected{% endif %}>10 Per page</option>
-                                        <option value="20" {% if orders.paginator.per_page == 20 %}selected{% endif %}>20 Per page</option>
-                                        <option value="50" {% if orders.paginator.per_page == 50 %}selected{% endif %}>50 Per page</option>
-                                    </select>
-                                </div>
-                              </form>
-                            </div>
-                          </div>
-                          
+                          </form>
+                        </div>
+                      </div> 
                     </div>
+                    
                     <table class="table text-nowrap mb-0 align-middle table-bordered table-hover">
-                      <thead class="text-dark fs-4">
-                        <tr>
-                          <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0">Id</h6>
-                          </th>
-                          <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0">User ID</h6>
-                          </th>
-                          <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0">Payment Status</h6>
-                          </th>
-                          <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0">Product Name</h6>
-                          </th>
-                          <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0">Quantity</h6>
-                          </th>
-                          <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0">Address</h6>
-                          </th>
-                          <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0">Status</h6>
-                          </th>
-                          <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0">Cancellation</h6>
-                          </th>
-                          <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0">Action</h6>
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {% for order in orders %}
-                        <tr>
-                          <td class="border-bottom-0"><h6 class="fw-semibold mb-0 {% if not order.admin_action %}text-decoration-line-through{% endif %}">{{ order.id }}</h6></td>
-                          <td class="border-bottom-0"><h6 class="fw-semibold mb-1 {% if not order.admin_action %}text-decoration-line-through{% endif %}">{{ order.customer.id }}</h6></td>
-                          <td class="border-bottom-0"><p class="mb-0 fw-normal {% if not order.admin_action %}text-decoration-line-through{% endif %}">{{ order.payment }}</p></td>
-                          <td class="border-bottom-0"><h6 class="fw-semibold mb-1 {% if not order.admin_action %}text-decoration-line-through{% endif %}">{{ order.product.name }}</h6></td>
-                          <td class="border-bottom-0"><h6 class="fw-semibold mb-1 {% if not order.admin_action %}text-decoration-line-through{% endif %}">{{ order.quantity }}</h6></td>
-                          <td class="border-bottom-0"><p class="mb-0 fw-normal {% if not order.admin_action %}text-decoration-line-through{% endif %}">{{ order.address.line_1 }}</p></td>
-                          <td class="border-bottom-0"><h6 class="fw-semibold mb-1 {% if not order.admin_action %}text-decoration-line-through{% endif %}">{{ order.status }}</h6></td>
-                            <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="badge {% if order.admin_action %}bg-primary{% else %}bg-danger{% endif %} rounded-3 fw-semibold">
-                                        {% if order.admin_action %}Permitted{% else %}Cancelled{% endif %}
-                                    </span>
-                                </div>
-                            </td>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-1"><a href="{% url 'order_edit' order.id %}">Edit</a></h6>
-                            </td>
-                        </tr> 
-                        {% endfor %}     
-                    </tbody>
-
+                        <thead class="text-dark fs-4">
+                            <tr>
+                                <th class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-0">Id</h6>
+                                </th>
+                                <th class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-0">User ID</h6>
+                                </th>
+                                <th class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-0">Payment Status</h6>
+                                </th>
+                                <th class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-0">Product Name</h6>
+                                </th>
+                                <th class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-0">Quantity</h6>
+                                </th>
+                                <th class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-0">Address</h6>
+                                </th>
+                                <th class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-0">Status</h6>
+                                </th>
+                                <th class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-0">Cancellation</h6>
+                                </th>
+                                <th class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-0">Action</h6>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr>
+                                <td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{ order.id }}</h6></td>
+                                <td class="border-bottom-0"><h6 class="fw-semibold mb-1">{{ order.customer.id }}</h6></td>
+                                <td class="border-bottom-0"><p class="mb-0 fw-normal">{{ order.payment }}</p></td>
+                                <td class="border-bottom-0">
+                                    {% if order.orderitem_set.all %}
+                                        {% for order_item in order.orderitem_set.all %}
+                                            <h6 class="fw-semibold mb-1">
+                                                {{ order_item.product.name }} (x{{ order_item.quantity }})
+                                            </h6>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p class="mb-0 fw-normal">No products</p>
+                                    {% endif %}
+                                </td>                                                
+                                <td class="border-bottom-0"><h6 class="fw-semibold mb-1">{{ order.quantity }}</h6></td>
+                                <td class="border-bottom-0"><p class="mb-0 fw-normal">{{ order.address.line_1 }}</p></td>
+                                <td class="border-bottom-0"><h6 class="fw-semibold mb-1">{{ order.status }}</h6></td>
+                                <td class="border-bottom-0">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge {% if order.admin_action %}bg-primary{% else %}bg-danger{% endif %} rounded-3 fw-semibold">
+                                            {% if order.admin_action %}Permitted{% else %}Cancelled{% endif %}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-1"><a href="{% url 'order_edit' order.id %}">Edit</a></h6>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
                     </table>
+                    
                     <div class="pagination">
                         {% if orders.has_previous %}
-                          <a class="btn btn-light" href="?page={{ orders.previous_page_number }}&entries={{ orders.paginator.per_page }}&search={{ request.GET.search }}">Previous</a>
+                          <a class="btn btn-light" href="?page={{ orders.previous_page_number }}&entries={{ orders.paginator.per_page }}&search={{ search_query }}">Previous</a>
                         {% endif %}
+                      
                         {% for num in orders.paginator.page_range %}
                           {% if orders.number == num %}
-                            <button class="btn btn-success">{{ num }}</button>
+                            <span class="current-page btn btn-success">{{ num }}</span>
                           {% else %}
-                            <a class="btn btn-light" href="?page={{ num }}&entries={{ orders.paginator.per_page }}&search={{ request.GET.search }}">{{ num }}</a>
+                            <a class="btn btn-light" href="?page={{ num }}&entries={{ orders.paginator.per_page }}&search={{ search_query }}">{{ num }}</a>
                           {% endif %}
                         {% endfor %}
+                      
                         {% if orders.has_next %}
-                          <a class="btn btn-light" href="?page={{ orders.next_page_number }}&entries={{ orders.paginator.per_page }}&search={{ request.GET.search }}">Next</a>
+                          <a class="btn btn-light" href="?page={{ orders.next_page_number }}&entries={{ orders.paginator.per_page }}&search={{ search_query }}">Next</a>
                         {% endif %}
-                      </div>                  
-     
+                    </div>                                    
                   </div>
                 </div>
               </div>

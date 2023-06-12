@@ -5,15 +5,7 @@
         <title>Shop</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mukta:300,400,700"> 
-        <link rel="stylesheet" href="{% static 'fonts/icomoon/style.css' %}">
-        <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-        <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}">
-        <link rel="stylesheet" href="{% static 'css/jquery-ui.css' %}">
-        <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
-        <link rel="stylesheet" href="{% static 'css/owl.theme.default.min.css' %}">
-        <link rel="stylesheet" href="{% static 'css/aos.css' %}">
-        <link rel="stylesheet" href="{% static 'css/style.css' %}">
+        {% include 'snippets/dependencies_customer_header.html' %}
     </head>
     <body>
         <div class="site-wrap">
@@ -23,18 +15,47 @@
                     <div class="row mb-5">
                         <div class="col-md-3 order-1 mb-5 mb-md-0">
                             <div class="border p-4 rounded mb-4">
-                            <h3 class="mb-3 h6 text-uppercase text-black d-block">Categories</h3>
-                            <ul class="list-unstyled mb-0">
-                                <li class="mb-1"><a href="#" class="d-flex"><span>Notebooks & Diaries</span> <span class="text-black ml-auto"></span></a></li>
-                                <li class="mb-1"><a href="#" class="d-flex"><span>Writing & Painting</span> <span class="text-black ml-auto"></span></a></li>
-                                <li class="mb-1"><a href="#" class="d-flex"><span>Office Supplies</span> <span class="text-black ml-auto"></span></a></li>
-                                <li class="mb-1"><a href="#" class="d-flex"><span>School Supplies</span> <span class="text-black ml-auto"></span></a></li>
-                                <li class="mb-1"><a href="#" class="d-flex"><span>Art & Craft Supplies</span> <span class="text-black ml-auto"></span></a></li>
-                                <li class="mb-1"><a href="#" class="d-flex"><span>Customize</span> <span class="text-black ml-auto"></span></a></li>
-                            </ul>
+                                <h3 class="mb-3 h6 text-uppercase text-black d-block">Categories</h3>
+                                <form method="GET" action="{% url 'shop_all' %}">
+                                    {% for category in categories %}
+                                    <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+                                        <input type="checkbox" class="custom-control-input category-checkbox" id="color-{{ category.id }}" name="category[]" value="{{ category.id }}" {% if category.id|stringformat:"s" in selected_categories %}checked{% endif %}>
+                                        <label class="custom-control-label" for="color-{{ category.id }}">{{ category.name }}</label>                                        
+                                    </div>
+                                    {% endfor %}
+                                    <button type="submit" class="btn btn-primary">Apply</button>
+                                </form>
                             </div>
 
-                            {% comment %} <div class="border p-4 rounded mb-4">
+                            {% comment %} <div class="border-bottom mb-4 pb-4">
+                                <h5 class="font-weight-semi-bold mb-4">Filter by Categories</h5>
+                                <form method="get" action="{% url 'userproduct' %}">
+                                    {% csrf_token %}
+                                    <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+                                        <input type="checkbox" class="custom-control-input category-checkbox" id="color-1" name="category" value="Large Plants and Trees" {% if 'Large Plants and Trees' in selected_categories %}checked{% endif %}>
+                                        <label class="custom-control-label" for="color-1">Large Plants & Trees</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+                                        <input type="checkbox" class="custom-control-input category-checkbox" id="color-2" name="category" value="Flowering Plants" {% if 'Flowering Plants' in selected_categories %}checked{% endif %}>
+                                        <label class="custom-control-label" for="color-2">Flowering Plants</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+                                        <input type="checkbox" class="custom-control-input category-checkbox" id="color-3" name="category" value="Faux and Preserved" {% if 'Faux and Preserved' in selected_categories %}checked{% endif %}>
+                                        <label class="custom-control-label" for="color-3">Faux & Preserved Plants</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+                                        <input type="checkbox" class="custom-control-input category-checkbox" id="color-4" name="category" value="Pet-Friendly Plants" {% if 'Pet-Friendly Plants' in selected_categories %}checked{% endif %}>
+                                        <label class="custom-control-label" for="color-4">Pet-Friendly Plants</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+                                        <input type="checkbox" class="custom-control-input category-checkbox" id="color-5" name="category" value="For-Beginers" {% if 'For-Beginers' in selected_categories %}checked{% endif %}>
+                                        <label class="custom-control-label" for="color-5">For Beginners</label>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Apply</button>
+                                </form>
+                            </div> {% endcomment %}
+
+                            {% comment %}<div class="border p-4 rounded mb-4">
                                 <div class="mb-4">
                                     <h3 class="mb-3 h6 text-uppercase text-black d-block">Filter by Price</h3>
                                     <div id="slider-range" class="border-primary"></div>
@@ -75,7 +96,7 @@
                             <div class="row align">
                                 <div class="col-md-12 mb-5">
                                     <div class="float-md-left"><h2 class="text-black h5">Shop Amazing Products</h2></div>
-                                    <div class="d-flex">
+                                    {% comment %} <div class="d-flex">
                                         <div class="dropdown mr-1 ml-md-auto">
                                             <button type="button" class="btn btn-white btn-sm dropdown-toggle px-4" id="dropdownMenuOffset" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                             Latest
@@ -97,14 +118,18 @@
                                                 <a class="dropdown-item" href="#">Price, high to low</a>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> {% endcomment %}
                                 </div>
                             </div>
-                            <div class="row mb-6">
+                            <div id="product-list" class="row mb-6">
                                 {% for product in products %}
                                 <div class="col-lg-4 col-md-4 item-entry mb-4">
                                     <a href="{% url 'product_page' product.id %}" class="product-item md-height bg-gray d-block">
-                                    <img src="{{product.image.url}}" alt="Image" class="img-fluid">
+                                    {% if product.images.exists %}
+                                        <img src="{{ product.images.first.image.url }}" alt="Product Image">
+                                    {% else %}
+                                        <span>No image available</span>
+                                    {% endif %}
                                     </a>
                                     <h2 class="item-title"><a href="{% url 'product_page' product.id %}">{{product.name}}</a></h2>
                                     <strong class="item-price">&#x20B9; {{product.mrp}}</strong>
@@ -115,7 +140,6 @@
                                 </div>
                                 {% endfor %}
                             </div>
-
                             {% comment %} <div class="row">
                                 <div class="col-md-12 text-center">
                                     <div class="site-block-27">
@@ -141,33 +165,26 @@
         </div>
         <script>
             function addToCart(productId) {
-              var csrfToken = getCookie('csrftoken'); // Function to retrieve the CSRF token from cookies
-          
+              var csrfToken = getCookie('csrftoken');
               fetch('/add-to-cart/' + productId + '/', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
-                  'X-CSRFToken': csrfToken // Include the CSRF token in the request headers
+                  'X-CSRFToken': csrfToken
                 },
-                credentials: 'same-origin', // Include cookies in the request if needed
-                body: JSON.stringify({}) // Empty request body or you can include additional data if required
+                credentials: 'same-origin',
+                body: JSON.stringify({})
               })
               .then(function(response) {
-                return response.json(); // Parse the response as JSON
+                return response.json();
               })
               .then(function(data) {
-                // Handle the response data here
-                console.log(data.message); // Log the message to the console or display it on the page
-          
-                // You can perform any additional actions based on the response, such as updating the UI
+                console.log(data.message);
               })
               .catch(function(error) {
-                // Handle any error that occurred during the request
                 console.error('Error:', error);
               });
             }
-          
-            // Function to retrieve the CSRF token from cookies
             function getCookie(name) {
               var cookieValue = null;
               if (document.cookie && document.cookie !== '') {
@@ -185,33 +202,26 @@
         </script>
         <script>
             function addToWishList(productId) {
-              var csrfToken = getCookie('csrftoken'); // Function to retrieve the CSRF token from cookies
-            
+              var csrfToken = getCookie('csrftoken');
               fetch('/add-to-wish-list/' + productId + '/', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
-                  'X-CSRFToken': csrfToken // Include the CSRF token in the request headers
+                  'X-CSRFToken': csrfToken
                 },
-                credentials: 'same-origin', // Include cookies in the request if needed
-                body: JSON.stringify({}) // Empty request body or you can include additional data if required
+                credentials: 'same-origin',
+                body: JSON.stringify({})
               })
               .then(function(response) {
-                return response.json(); // Parse the response as JSON
+                return response.json();
               })
               .then(function(data) {
-                // Handle the response data here
-                console.log(data.message); // Log the message to the console or display it on the page
-            
-                // You can perform any additional actions based on the response, such as updating the UI
+                console.log(data.message);
               })
               .catch(function(error) {
-                // Handle any error that occurred during the request
                 console.error('Error:', error);
               });
             }
-            
-            // Function to retrieve the CSRF token from cookies
             function getCookie(name) {
               var cookieValue = null;
               if (document.cookie && document.cookie !== '') {
@@ -227,13 +237,7 @@
               return cookieValue;
             }
         </script>
-        <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
-        <script src="{% static 'js/jquery-ui.js' %}"></script>
-        <script src="{% static 'js/popper.min.js' %}"></script>
-        <script src="{% static 'js/bootstrap.min.js' %}"></script>
-        <script src="{% static 'js/owl.carousel.min.js' %}"></script>
-        <script src="{% static 'js/jquery.magnific-popup.min.js' %}"></script>
-        <script src="{% static 'js/aos.js' %}"></script>
-        <script src="{% static 'js/main.js' %}"></script>
+        
+        {% include 'snippets/dependencies_customer_footer.html'%}
     </body>
 </html>

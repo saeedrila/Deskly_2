@@ -28,53 +28,82 @@
         <!--  Row 1 -->
         <div class="row">
             <div class="card-body p-4">
-                <div class="btn"><h1>Title</h1></div>
-                <button type="button" class="btn btn-info m-1" style="float:right;">Add New </button>
+                <div class="btn"><h1>Coupon</h1></div>
+                <button type="button" class="btn btn-primary" style="float:right;" data-bs-toggle="modal" data-bs-target="#addCouponModal">Add New Coupon</button>
             </div>
           <!-- Recent Products Added -->
           <div class="col-lg-12 d-flex align-items-stretch">
             <div class="card w-100">
+                {% if messages %}
+                <div class="card-body p-4">
+                    {% for message in messages %}
+                    <div class="alert alert-success" id="success-message">{{ message }}</div>
+                    {% endfor %}
+                </div>
+                <script>
+                    setTimeout(function() {
+                    var successMessage = document.getElementById("success-message");
+                    if (successMessage) {
+                        successMessage.remove();
+                    }
+                    }, 2000);
+                </script>
+                {% endif %}
               <div class="card-body p-4">
                 <div class="table-responsive">
-                  <table class="table text-nowrap mb-0 align-middle">
+                  <table class="table text-nowrap mb-0 align-middle table-bordered table-hover">
                     <thead class="text-dark fs-4">
                       <tr>
                         <th class="border-bottom-0">
                           <h6 class="fw-semibold mb-0">Id</h6>
                         </th>
                         <th class="border-bottom-0">
-                          <h6 class="fw-semibold mb-0">Assigned</h6>
+                          <h6 class="fw-semibold mb-0">Coupon code</h6>
                         </th>
                         <th class="border-bottom-0">
-                          <h6 class="fw-semibold mb-0">Name</h6>
+                          <h6 class="fw-semibold mb-0">Discount Percentage</h6>
                         </th>
                         <th class="border-bottom-0">
-                          <h6 class="fw-semibold mb-0">Priority</h6>
+                          <h6 class="fw-semibold mb-0">Issued quantity</h6>
                         </th>
                         <th class="border-bottom-0">
-                          <h6 class="fw-semibold mb-0">Budget</h6>
+                          <h6 class="fw-semibold mb-0">Remaining quantity</h6>
+                        </th>
+                        <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0">Live</h6>
+                        </th>
+                        <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0">Action</h6>
                         </th>
                       </tr>
                     </thead>
                     <tbody>
-                        {% for product in recent_products_added %}
+                        {% for coupon in coupons %}
                         <tr>
-                            <td class="border-bottom-0"><h6 class="fw-semibold mb-0">1</h6></td>
+                            <td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{coupon.id}}</h6></td>
                             <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-1">Sunil Joshi</h6>                        
+                                <h6 class="fw-semibold mb-1">{{coupon.coupon_code}}</h6>                        
                             </td>
                             <td class="border-bottom-0">
-                            <p class="mb-0 fw-normal">Elite Admin</p>
+                              <div class="d-flex align-items-center gap-2">
+                                  <span class="badge bg-primary rounded-3 fw-semibold">{{coupon.discount_percentage}}</span>
+                              </div>
                             </td>
                             <td class="border-bottom-0">
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="badge bg-primary rounded-3 fw-semibold">Low</span>
-                            </div>
+                            <p class="mb-0 fw-normal">{{coupon.issued_quantity}}</p>
                             </td>
                             <td class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0 fs-4">$3.9</h6>
+                                <p class="mb-0 fw-normal">{{coupon.remaining_quantity}}</p>
                             </td>
-                        </tr> 
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge {% if coupon.is_active %}bg-primary{% else %}bg-danger{% endif %} rounded-3 fw-semibold">{{coupon.is_active}}</span>
+                                </div>
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1"><a href="{% url 'coupon_edit' coupon.id %}">Edit</a></h6>                        
+                            </td>
+                        </tr>
                         {% endfor %}     
                     </tbody>
                   </table>
@@ -89,6 +118,48 @@
       </div>
     </div>
   </div>
+
+  <div class="modal fade" id="addCouponModal" tabindex="-1" aria-labelledby="addCouponModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+        </div>
+        <div class="modal-body">
+          <form action="{% url 'coupon_add' %}" method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="name" class="form-label">Coupon Code: </label>
+                <input type="text" class="form-control" id="name" name="coupon_code" required>
+              </div>
+            <div class="mb-3">
+              <label for="name" class="form-label">Discount Percentage:</label>
+              <input type="number" class="form-control" id="name" name="discount_percentage" min="1" step="1" required>
+            </div>
+            <div class="mb-3">
+                <label for="name" class="form-label">Issued Quantity:</label>
+                <input type="number" class="form-control" id="name" name="issued_quantity" min="1" step="1" required>
+            </div>
+            <div class="mb-3">
+                <label for="name" class="form-label">Remaining Quantity:</label>
+                <input type="number" class="form-control" id="name" name="remaining_quantity" min="1" step="1" required>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Add Address</button>
+              </div>
+          </form>
+        </div>
+      </div>
+    </div>
+</div>
+<script>
+    var addCouponModal = document.getElementById('addCouponModal');
+    addCouponModal.addEventListener('show.bs.modal', function (event) {
+      var form = addCouponModal.querySelector('form');
+      form.reset();
+    });
+</script>
+
   <script src="{% static 'modernize/libs/jquery/dist/jquery.min.js' %}"></script>
   <script src="{% static 'modernize/libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
   <script src="{% static 'modernize/js/sidebarmenu.js' %}"></script>
