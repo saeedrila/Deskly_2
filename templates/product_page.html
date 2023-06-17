@@ -45,6 +45,9 @@
                         <p></p>
                         {% if product.offer_product_price %}
                         <p><strong class="text-primary h4"><del>&#x20B9; {{ product.mrp }}</del></strong></p>
+                        {% if product_offer %}
+                        <p><strong class="text-secondary h5">Product discount of {{product_offer}}% is included in the final price</strong></p>
+                        {% endif %}
                         <p><strong class="text-primary h4">&#x20B9; {{ product.offer_product_price }}</strong></p>
                         {% else %}
                             <p><strong class="text-primary h4">&#x20B9; {{ product.mrp }}</strong></p>

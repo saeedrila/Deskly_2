@@ -39,6 +39,7 @@ class Account(AbstractBaseUser):
 	is_active				= models.BooleanField(default=True)
 	is_staff				= models.BooleanField(default=False)
 	is_superuser			= models.BooleanField(default=False)
+	referral_code			= models.CharField(max_length=10, null=True, blank=True)
 
 	USERNAME_FIELD = 'email'
 	REQUIRED_FIELDS = []

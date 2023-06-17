@@ -68,10 +68,13 @@
                                                 <h6 class="fw-semibold mb-0">Order Id</h6>
                                               </th>
                                               <th class="border-bottom-0">
-                                                <h6 class="fw-semibold mb-0">Payment Status</h6>
+                                                <h6 class="fw-semibold mb-0">Product Name</h6>
                                               </th>
                                               <th class="border-bottom-0">
-                                                <h6 class="fw-semibold mb-0">Product Name</h6>
+                                                <h6 class="fw-semibold mb-0">Order Amount</h6>
+                                              </th>
+                                              <th class="border-bottom-0">
+                                                <h6 class="fw-semibold mb-0">Payment Status</h6>
                                               </th>
                                               <th class="border-bottom-0">
                                                 <h6 class="fw-semibold mb-0">Quantity</h6>
@@ -94,7 +97,6 @@
                                             {% for order in orders %}
                                             <tr>
                                                 <td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{ order.id }}</h6></td>
-                                                <td class="border-bottom-0"><p class="mb-0 fw-normal">{{ order.payment }}</p></td>
                                                 <td class="border-bottom-0">
                                                     {% if order.orderitem_set.all %}
                                                         {% for order_item in order.orderitem_set.all %}
@@ -105,7 +107,9 @@
                                                     {% else %}
                                                         <p class="mb-0 fw-normal">No products</p>
                                                     {% endif %}
-                                                </td>                                                
+                                                </td>
+                                                <td class="border-bottom-0"><p class="mb-0 fw-normal">{{ order.net_total }}</p></td>
+                                                <td class="border-bottom-0"><p class="mb-0 fw-normal">{{ order.payment }}</p></td>
                                                 <td class="border-bottom-0"><h6 class="fw-semibold mb-1">{{ order.quantity }}</h6></td>
                                                 <td class="border-bottom-0"><p class="mb-0 fw-normal">{{ order.address.line_1 }}</p></td>
                                                 <td class="border-bottom-0"><h6 class="fw-semibold mb-1">{{ order.status }}</h6></td>

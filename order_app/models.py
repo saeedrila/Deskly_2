@@ -5,20 +5,22 @@ from django.core.validators import MinValueValidator
 from django.utils.timezone import now
 
 class WishList(models.Model):
-	customer 			= models.ForeignKey(Account, on_delete=models.CASCADE)
-	product 		    = models.ForeignKey(Product, on_delete=models.CASCADE)
+    customer 			= models.ForeignKey(Account, on_delete=models.CASCADE, null=True, blank=True)
+    product 		    = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True)
+    device              = models.CharField(max_length=255, null=True, blank=True)
 
-	def __str__(self):
-		return self.name
-	
+    def __str__(self):
+        return self.name
+
 class CartItem(models.Model):
-    customer = models.ForeignKey(Account, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Account, on_delete=models.CASCADE, null=True, blank=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True)
     quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
+    device = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return str(self.pk)
-	
+
 class Address(models.Model):
     customer			= models.ForeignKey(Account, on_delete=models.CASCADE)
     title               = models.CharField(max_length=50, default='Title')
@@ -75,6 +77,17 @@ class CategoryOffer(models.Model):
 
     def __str__(self):
         return str(self.category)
+    
+#Wallet
+class Wallet(models.Model):
+    customer = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='wallets')
+    description = models.CharField(max_length=255, null=True, blank=True)
+    amount = models.IntegerField(default=0)
+    reference = models.CharField(max_length=255, null=True, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return str(self.pk)
 
 
 class RazorpayDemo(models.Model):

@@ -18,6 +18,9 @@ urlpatterns = [
 
 
 #Sample pages
+    #Image crop example
+    path('image-crop/', views.image_crop, name='image_crop'),
+
     #Search using jquery
     path('search-jquery', views.search_jquery, name='search_jquery'),
     path('get-suggestion', views.get_suggestion, name='get_suggestion'),

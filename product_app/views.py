@@ -5,11 +5,8 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.core.files.storage import default_storage
+import uuid
 
-#Multiple images, needed?
-from django.core.files.base import ContentFile
-from django.conf import settings
-import os
 
 from .forms import *
 from order_app.models import *
@@ -18,9 +15,6 @@ from order_app.models import *
 def shop_all(request):
     query = request.GET.get('search')
     selected_categories = request.GET.getlist('category[]')
-    print('****************************')
-    print(selected_categories)
-    print('****************************')
     try:
         products = Product.objects.all()
         if query:
@@ -28,15 +22,22 @@ def shop_all(request):
         if selected_categories:
             products = products.filter(category__id__in=selected_categories)
 
-
         categories = Category.objects.all()
         context = {
             'products': products,
             'categories': categories,
-            'selected_categories':selected_categories
+            'selected_categories': selected_categories
         }
     except Product.DoesNotExist:
         raise Http404("Product does not exist.")
+    
+    device_id = request.COOKIES.get('device_id')
+    if not device_id:
+        device_id = uuid.uuid4()
+        response = render(request, "shop_all.html", context)
+        response.set_cookie('device_id', device_id)
+        return response
+
     return render(request, "shop_all.html", context)
 
 
@@ -44,12 +45,19 @@ def product_page(request, product_id=None):
     context = {}
     try:
         product = Product.objects.get(id=product_id)
+
+        if product.offer_is_active:
+            product_retail_price = round(product.mrp * (1 - product.offer_percentage / 100))
+            context['product_offer'] = product.offer_percentage
+        else:
+            product_retail_price = product.mrp
+
         category_id = product.category_id
         category_offers = CategoryOffer.objects.filter(category_id=category_id)[:1]
         if category_offers.exists():
             category_offer = category_offers[0]
             discount_percentage = category_offer.discount_percentage
-            offer_product_price = round(product.mrp * (1 - discount_percentage / 100))
+            offer_product_price = round(product_retail_price * (1 - discount_percentage / 100))
             product.offer_product_price = offer_product_price
             print("Category offer exists")
         else:
@@ -58,9 +66,16 @@ def product_page(request, product_id=None):
     except Product.DoesNotExist:
         print("Product does not exist")
 
-        
     except Product.DoesNotExist:
         raise Http404("Product does not exist.")
+    
+    device_id = request.COOKIES.get('device_id')
+    if not device_id:
+        device_id = uuid.uuid4()
+        response = render(request, "shop_all.html", context)
+        response.set_cookie('device_id', device_id)
+        return response
+    
     return render(request, "product_page.html", context)
 
 
@@ -200,9 +215,6 @@ def subcategory_dashboard(request):
         return redirect("admin_login")
 
 
-
-
-
 #Dependent drop down menu
 def get_subcategories(request):
     category_id = request.GET.get('category_id')
@@ -262,3 +274,9 @@ def get_suggestion(request):
     my_list = []
     my_list += [x.name for x in queryset]
     return JsonResponse(my_list, safe=False)
+
+# Image crop example
+def image_crop(request):
+    form = ImageForm()
+    context = {'form': form}
+    return render(request, 'image_crop.html', context)

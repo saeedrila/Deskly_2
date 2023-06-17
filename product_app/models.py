@@ -38,20 +38,24 @@ class Product(models.Model):
 	sell_count			= models.PositiveIntegerField(default=0)
 	date_added			= models.DateTimeField(auto_now_add=True)
 	varient     		= models.CharField(max_length=20, default='Basic')
+	offer_is_active		= models.BooleanField(default=False)
+	offer_percentage	= models.PositiveIntegerField(default=0)
 
 	def __str__(self):
 		return self.name
 	
 class Subproduct(models.Model):
-    product         = models.ForeignKey(Product, related_name='subproducts', on_delete=models.CASCADE)
-    subproduct_id   = models.CharField(max_length=50)
-    mrp             = models.PositiveIntegerField(default=0)
-    stock           = models.PositiveIntegerField(default=0)
-    sell_count      = models.PositiveIntegerField(default=0)
-    varient      = models.CharField(max_length=20)
+	product         	= models.ForeignKey(Product, related_name='subproducts', on_delete=models.CASCADE)
+	subproduct_id   	= models.CharField(max_length=50)
+	mrp             	= models.PositiveIntegerField(default=0)
+	stock           	= models.PositiveIntegerField(default=0)
+	sell_count      	= models.PositiveIntegerField(default=0)
+	varient      		= models.CharField(max_length=20)
+	offer_is_active		= models.BooleanField(default=False)
+	offer_percentage	= models.PositiveIntegerField(default=0)
 
-    def __str__(self):
-        return f"Subproduct {self.subproduct_id} of {self.product.name}"
+	def __str__(self):
+		return f"Subproduct {self.subproduct_id} of {self.product.name}"
     
 def product_image_upload_to(instance, filename):
     product_name = instance.product.name.replace(' ', '_')
@@ -64,9 +68,17 @@ class ProductImage(models.Model):
     def __str__(self):
         return f"Image for {self.product.name}"
 
-	
+#Sample model to check search autosuggestion
 class Names(models.Model):
 	name = models.CharField(max_length=100)
 
 	def __str__(self):
 		return self.name
+	
+#Sample model to check image cropping
+class Image(models.Model):
+	file = models.ImageField(upload_to='images')
+	uploaded = models.DateTimeField(auto_now_add=True)
+
+	def __str__(self):
+		return str(self.pk)

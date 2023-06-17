@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
 
-    #Project apps
+#Project apps
     'auth_app',
     'product_app',
     'order_app',

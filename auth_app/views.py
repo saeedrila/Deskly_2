@@ -10,6 +10,8 @@ import time
 from django.http import Http404, JsonResponse
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
+
 
 
 from . forms import RegistrationForm, AccountAuthenticationForm, AccountUpdateForm
@@ -18,30 +20,37 @@ from product_app.models import *
 from product_app.forms import *
 from . forms import *
 from order_app.models import *
-
-
-def demo_home(request):
-    context = {}
-    context['some_string'] = 'This is some string I am passing from views.py'
-    return render(request, "demo_home.html", context)
+from django.db.models import Sum
+from order_app.models import Wallet
+import uuid
+import string
+import random
 
 def home(request):
     context = {}
     context['popular_products'] = Product.objects.order_by('-sell_count')[:3]
     context['categories'] = Category.objects.all()[:6]
     context['latest_products'] = Product.objects.order_by('-date_added')[:6]
-    
+    device_id = request.COOKIES.get('device_id')
+    if not device_id:
+        device_id = uuid.uuid4()
+        response = render(request, "shop_all.html", context)
+        response.set_cookie('device_id', device_id)
+        return response
     return render(request, "home.html", context)
 
 def customer_registration(request):
     context = {}
     if request.POST:
         form = RegistrationForm(request.POST)
+        referral_code = request.POST.get('referral_code')
         if form.is_valid():
             form.save()
             email = form.cleaned_data.get('email')
             raw_password = form.cleaned_data.get('password1')
             account = authenticate(email=email, password=raw_password)
+
+            #OTP Generation for email confirmation
             generated_otp = generate_otp()
             sender_email = "rilasaeed@gmail.com"
             receiver_email = email
@@ -60,6 +69,7 @@ def customer_registration(request):
             login(request, account)
             request.session['email'] = email
             request.session['otp'] = generated_otp
+            request.session['referral_code'] =referral_code
             return redirect('verify_otp')
         else:
             context['registration_form'] = form
@@ -72,18 +82,60 @@ def verify_otp(request):
     if request.method == "POST":
         customer = Account.objects.get(email=request.session['email'])
         server_gernerated_otp = request.session.get('otp')
+        referral_code = request.session.get('referral_code')
+
         customer_input_otp = request.POST['otp']
         if server_gernerated_otp == customer_input_otp:
             customer.is_verified = True
             customer.save()
+
+            #Referral reward distribution
+            if referral_code:
+                add_referral_bonus(referral_code, customer)
+
             del request.session['email']
             del request.session['otp']
-            return redirect('home')
+            del request.session['referral_code']
+
+            device_id = request.COOKIES.get('device_id')
+            if device_id:
+                wish_list_items = WishList.objects.filter(device=device_id)
+                cart_items = CartItem.objects.filter(device=device_id)
+
+                for item in wish_list_items:
+                    item.customer = customer
+                    item.save()
+
+                for item in cart_items:
+                    item.customer = customer
+                    item.save()
+            response = redirect('customer_login')
+            response.delete_cookie('device_id')
+            return response
         else:
             customer.delete()
             return redirect('customer_registration')
     return render(request,'verify_otp.html')
 
+#Add referral bonus
+def add_referral_bonus(referral_code, customer):
+    referring_account = get_object_or_404(Account, referral_code=referral_code)
+    referring_wallet = Wallet.objects.create(
+        customer=referring_account,
+        description="Referral Bonus",
+        amount=100,
+        reference="Referral Bonus"
+    )
+    new_customer = customer
+    new_customer_wallet = Wallet.objects.create(
+        customer=new_customer,
+        description="Referral Bonus",
+        amount=100,
+        reference="Referral Bonus"
+    )
+    return True
+
+#OTP generation function
 def generate_otp(length = 6):
     return ''.join(secrets.choice("0123456789") for i in range(length)) 
 
@@ -96,6 +148,10 @@ def customer_login(request):
     context = {}
     user = request.user
     if user.is_authenticated:
+        if not user.referral_code:
+            referral_code = generate_referral_code()
+            user.referral_code = referral_code
+            user.save()
         return redirect ('home')
     if request.POST:
         form = AccountAuthenticationForm(request.POST)
@@ -110,6 +166,15 @@ def customer_login(request):
     form = AccountAuthenticationForm()
     context['login_form'] = form
     return render(request, 'login.html', context)
+
+def generate_referral_code():
+    characters = string.ascii_uppercase + string.digits
+    referral_code = ''.join(random.choice(characters) for _ in range(4))
+    return referral_code
+
+def get_total_wallet_amount(user):
+    total_amount = Wallet.objects.filter(customer=user).aggregate(Sum('amount'))['amount__sum']
+    return total_amount or 0
 
 def customer_account_dashboard(request):
     if request.user.is_authenticated:
@@ -137,8 +202,10 @@ def customer_account(request):
     user = request.user
     if user.is_authenticated:
         account = request.user
+        wallet_balance = Wallet.objects.filter(customer=account).aggregate(Sum('amount'))['amount__sum']
         context = {
             'account': account,
+            'wallet_balance':wallet_balance or 0,
         }
         return render(request, "customer_account.html", context)
     else:
@@ -321,9 +388,7 @@ def edit_customer(request, edit_id):
         return redirect('admin_login')
 
 
-
-
-
+#Not used in production
 def ad_template(request):
     context = {}
     context['some_string'] = 'This is some string I am passing from views.py'
@@ -333,3 +398,8 @@ def ad_edit_template(request):
     context = {}
     context['some_string'] = 'This is some string I am passing from views.py'
     return render(request, "ad_edit_template.html", context)
+
+def demo_home(request):
+    context = {}
+    context['some_string'] = 'This is some string I am passing from views.py'
+    return render(request, "demo_home.html", context)

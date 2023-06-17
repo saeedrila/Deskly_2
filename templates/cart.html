@@ -30,7 +30,11 @@
                         {% for cart_item in cart_items %}
                         <tr>
                             <td class="product-thumbnail">
-                                <img src="{{ cart_item.product.image.url }}" alt="Image" class="img-fluid">
+                                {% if item.product.image %}
+                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="img-fluid">
+                                {% else %}
+                                    <img src="/path/to/default/image.jpg" alt="Default Image" class="img-fluid">
+                                {% endif %}
                             </td>
                             <td class="product-name">
                                 <h2 class="h5 text-black">{{ cart_item.product.name }}</h2>
@@ -43,17 +47,17 @@
                                   &#x20B9; {{ cart_item.product.mrp }}
                                 {% endif %}
                               </td>
-                            <td>
-                              <div class="input-group mb-3" style="max-width: 120px;">
-                                <div class="input-group-prepend">
-                                  <button onclick="updateQuantity('{{ cart_item.product.id }}', 'decrease')" class="btn btn-outline-primary js-btn-minus" type="button">&minus;</button>
+                              <td>
+                                <div class="input-group mb-3" style="max-width: 160px;">
+                                  <div class="input-group-prepend">
+                                    <button onclick="updateQuantity('{{ cart_item.product.id }}', 'decrease')" class="btn btn-outline-primary js-btn-minus" type="button">&minus;</button>
+                                  </div>
+                                  <input id="quantity-input-{{ cart_item.product.id }}" type="number" min="1" class="form-control text-center" value="{{ cart_item.quantity|default_if_none:1 }}" placeholder="" aria-label="Example text with button addon" aria-describedby="button-addon1">
+                                  <div class="input-group-append">
+                                    <button onclick="updateQuantity('{{ cart_item.product.id }}', 'increase')" class="btn btn-outline-primary js-btn-plus" type="button">&plus;</button>
+                                  </div>
                                 </div>
-                                <input id="quantity-input-{{ cart_item.product.id }}" type="number" min="1" class="form-control text-center" value="{{ cart_item.quantity }}" placeholder="" aria-label="Example text with button addon" aria-describedby="button-addon1">
-                                <div class="input-group-append">
-                                  <button onclick="updateQuantity('{{ cart_item.product.id }}', 'increase')" class="btn btn-outline-primary js-btn-plus" type="button">&plus;</button>
-                                </div>
-                              </div>
-                            </td>
+                              </td>                                                                                    
                             <td>&#x20B9; {{ cart_item.subtotal }}</td>
                             <td><a href="#" onclick="removeFromCart('{{ cart_item.product.id }}')" class="btn btn-primary height-auto btn-sm">X</a></td>
                         </tr>

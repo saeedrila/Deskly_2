@@ -11,6 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 import json
 from decimal import Decimal
+from django.contrib.auth.models import AnonymousUser
 
 import razorpay
 
@@ -20,53 +21,6 @@ from . forms import PaymentForm
 from product_app.views import *
 
 
-# Cart and add to cart need modification
-def cart(request):
-    if not request.user.is_authenticated:
-        return redirect("home")
-    cart_items = CartItem.objects.filter(customer=request.user).order_by('id')
-    for item in cart_items:
-        try:
-            product = Product.objects.get(id=item.product_id)
-            category_id = product.category_id
-            category_offers = CategoryOffer.objects.filter(category_id=category_id)[:1]
-
-            if category_offers.exists():
-                category_offer = category_offers[0]
-                discount_percentage = category_offer.discount_percentage
-                offer_product_price = round(product.mrp * (1 - discount_percentage / 100))
-                product.offer_product_price = offer_product_price
-                item.offer_product_price = offer_product_price
-            else:
-                pass
-        except Product.DoesNotExist:
-            pass
-        try:
-            item.subtotal = Decimal(item.offer_product_price) * item.quantity
-        except:
-            item.subtotal = Decimal(item.product.mrp) * item.quantity
-    total = sum((Decimal(item.subtotal) for item in cart_items))
-
-    discount_percentage = 0
-    coupon_code = request.session.get('coupon_code')
-    if coupon_code:
-        try:
-            coupon = Coupon.objects.get(Q(coupon_code__iexact=coupon_code))
-            if coupon.is_active:
-                discount_percentage = coupon.discount_percentage
-        except Coupon.DoesNotExist:
-            pass
-
-    coupon_discount = round(total * Decimal(discount_percentage/100))
-    net_total = total - coupon_discount
-    
-    context = {
-        'cart_items': cart_items,
-        'total': total,
-        'coupon_discount': coupon_discount,
-        'net_total': net_total,
-    }
-    return render(request, 'cart.html', context)
 
 def verify_coupon(request):
     if request.method == 'POST':
@@ -89,6 +43,8 @@ def render_cart_totals(request):
 
 @never_cache
 def checkout_address(request):
+    if not request.user.is_authenticated:
+        return redirect('customer_registration')
     if request.method == 'POST':
         selected_address_id = request.POST.get('selected_address')
         if selected_address_id:
@@ -108,12 +64,18 @@ def checkout_address(request):
                 category_id = product.category_id
                 category_offers = CategoryOffer.objects.filter(category_id=category_id)[:1]
 
-                if category_offers.exists():
-                    category_offer = category_offers[0]
-                    discount_percentage = category_offer.discount_percentage
-                    offer_product_price = round(product.mrp * (1 - discount_percentage / 100))
-                    product.offer_product_price = offer_product_price
-                    item.offer_product_price = offer_product_price
+                if product.offer_is_active or category_offers.exists():
+                    if product.offer_is_active:
+                        product_retail_price = round(product.mrp * (1 - product.offer_percentage / 100))
+                    else:
+                        product_retail_price = product.mrp
+
+                    if category_offers.exists():
+                        category_offer = category_offers[0]
+                        discount_percentage = category_offer.discount_percentage
+                        offer_product_price = round(product_retail_price * (1 - discount_percentage / 100))
+                        product.offer_product_price = offer_product_price
+                        item.offer_product_price = offer_product_price
                 else:
                     pass
             except Product.DoesNotExist:
@@ -166,12 +128,18 @@ def checkout_payment(request, address_id=1):
             category_id = product.category_id
             category_offers = CategoryOffer.objects.filter(category_id=category_id)[:1]
 
-            if category_offers.exists():
-                category_offer = category_offers[0]
-                discount_percentage = category_offer.discount_percentage
-                offer_product_price = round(product.mrp * (1 - discount_percentage / 100))
-                product.offer_product_price = offer_product_price
-                item.offer_product_price = offer_product_price
+            if product.offer_is_active or category_offers.exists():
+                if product.offer_is_active:
+                    product_retail_price = round(product.mrp * (1 - product.offer_percentage / 100))
+                else:
+                    product_retail_price = product.mrp
+
+                if category_offers.exists():
+                    category_offer = category_offers[0]
+                    discount_percentage = category_offer.discount_percentage
+                    offer_product_price = round(product_retail_price * (1 - discount_percentage / 100))
+                    product.offer_product_price = offer_product_price
+                    item.offer_product_price = offer_product_price
             else:
                 pass
         except Product.DoesNotExist:
@@ -328,6 +296,69 @@ def thank_you(request):
         return render(request, "thank_you.html")
     return render(request, "thank_you.html")
 
+#Cart related methods
+def cart(request):
+    if not request.user.is_authenticated:
+        device_id = request.COOKIES.get('device_id')
+        if not device_id:
+            return redirect("home")
+        
+        cart_items = CartItem.objects.filter(device=device_id).order_by('id')
+    else:
+        cart_items = CartItem.objects.filter(customer=request.user).order_by('id')
+
+    for item in cart_items:
+        try:
+            product = Product.objects.get(id=item.product_id)
+            category_id = product.category_id
+            category_offers = CategoryOffer.objects.filter(category_id=category_id)[:1]
+
+            if product.offer_is_active or category_offers.exists():
+                if product.offer_is_active:
+                    product_retail_price = round(product.mrp * (1 - product.offer_percentage / 100))
+                else:
+                    product_retail_price = product.mrp
+
+                if category_offers.exists():
+                    category_offer = category_offers[0]
+                    discount_percentage = category_offer.discount_percentage
+                    offer_product_price = round(product_retail_price * (1 - discount_percentage / 100))
+                    product.offer_product_price = offer_product_price
+                    item.offer_product_price = offer_product_price
+            else:
+                item.offer_product_price = None
+
+        except Product.DoesNotExist:
+            pass
+
+        try:
+            item.subtotal = Decimal(item.offer_product_price) * item.quantity
+        except:
+            item.subtotal = Decimal(item.product.mrp) * item.quantity
+
+    total = sum((Decimal(item.subtotal) for item in cart_items))
+
+    discount_percentage = 0
+    coupon_code = request.session.get('coupon_code')
+    if coupon_code:
+        try:
+            coupon = Coupon.objects.get(coupon_code__iexact=coupon_code)
+            if coupon.is_active:
+                discount_percentage = coupon.discount_percentage
+        except Coupon.DoesNotExist:
+            pass
+
+    coupon_discount = round(total * Decimal(discount_percentage / 100))
+    net_total = total - coupon_discount
+
+    context = {
+        'cart_items': cart_items,
+        'total': total,
+        'coupon_discount': coupon_discount,
+        'net_total': net_total,
+    }
+
+    return render(request, 'cart.html', context)
 
 def add_to_cart(request, product_id):
     try:
@@ -335,7 +366,14 @@ def add_to_cart(request, product_id):
     except Product.DoesNotExist:
         return JsonResponse({'message': 'Product does not exist.'}, status=404)
 
-    cart_item, created = CartItem.objects.get_or_create(customer=request.user, product=product)
+    if isinstance(request.user, AnonymousUser):
+        device_id = request.COOKIES.get('device_id')
+        if not device_id:
+            return JsonResponse({'message': 'Device ID not found.'}, status=400)
+
+        cart_item, created = CartItem.objects.get_or_create(device=device_id, product=product)
+    else:
+        cart_item, created = CartItem.objects.get_or_create(customer=request.user, product=product)
 
     if created:
         cart_item.quantity = 1
@@ -346,7 +384,15 @@ def add_to_cart(request, product_id):
     return JsonResponse({'message': 'Product quantity updated in cart.'}, status=200)
 
 def update_cart(request, product_id):
-    cart_item = get_object_or_404(CartItem, product_id=product_id, customer=request.user)
+    if not request.user.is_authenticated:
+        device_id = request.COOKIES.get('device_id')
+        if not device_id:
+            return JsonResponse({'message': 'Device ID not found.'}, status=400)
+
+        cart_item = get_object_or_404(CartItem, product_id=product_id, device=device_id)
+    else:
+        cart_item = get_object_or_404(CartItem, product_id=product_id, customer=request.user)
+    
     try:
         data = json.loads(request.body)
         quantity = int(data.get('quantity'))
@@ -365,19 +411,22 @@ def update_cart(request, product_id):
 
     return JsonResponse({'message': 'Cart item updated.'}, status=200)
 
-def check_stock(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
-    stock_available = product.stock
-    return JsonResponse({'stock': stock_available})
 
 def remove_from_cart(request, product_id):
-    # User authentication not added
+    if not request.user.is_authenticated:
+        device_id = request.COOKIES.get('device_id')
+        if not device_id:
+            return JsonResponse({'message': 'Device ID not found.'}, status=400)
+
+        cart_item = CartItem.objects.filter(device=device_id, product_id=product_id)
+    else:
+        cart_item = CartItem.objects.filter(customer=request.user, product_id=product_id)
+
     try:
         product = Product.objects.get(id=product_id)
     except Product.DoesNotExist:
         return JsonResponse({'message': 'Product does not exist.'}, status=404)
 
-    cart_item = CartItem.objects.filter(customer=request.user, product=product)
     if not cart_item.exists():
         return JsonResponse({'message': 'Product is not in your cart.'}, status=400)
 
@@ -386,40 +435,86 @@ def remove_from_cart(request, product_id):
     return JsonResponse({'message': 'Product removed from cart.'}, status=200)
 
 
-
-def wish_list(request):
+def get_cart_count(request):
     if not request.user.is_authenticated:
-        return redirect("home")
-    wish_list_items = WishList.objects.filter(customer=request.user)
+        device_id = request.COOKIES.get('device_id')
+        if not device_id:
+            return JsonResponse({'count': 0})
+        
+        count = CartItem.objects.filter(device=device_id).count()
+    else:
+        count = CartItem.objects.filter(customer=request.user).count()
+
+    return JsonResponse({'count': count})
+
+
+#Stock availability check
+def check_stock(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    stock_available = product.stock
+    return JsonResponse({'stock': stock_available})
+
+
+#Wishlist related methods
+def wish_list(request):
+    if isinstance(request.user, AnonymousUser):
+        device_id = request.COOKIES.get('device_id')
+        if not device_id:
+            return redirect("home")
+
+        wish_list_items = WishList.objects.filter(device=device_id)
+    else:
+        wish_list_items = WishList.objects.filter(customer=request.user)
+
     context = {
         'wish_list_items': wish_list_items,
     }
     return render(request, 'wish_list.html', context)
 
 def add_to_wish_list(request, product_id):
-    # User authentication not added
     try:
         product = Product.objects.get(id=product_id)
     except Product.DoesNotExist:
         return JsonResponse({'message': 'Product does not exist.'}, status=404)
 
-    wishlist_item_exists = WishList.objects.filter(customer=request.user, product=product).exists()
-    if wishlist_item_exists:
-        return JsonResponse({'message': 'Product is already in your wishlist.'}, status=400)
+    if isinstance(request.user, AnonymousUser):
+        device_id = request.COOKIES.get('device_id')
+        if not device_id:
+            return JsonResponse({'message': 'Device ID not found.'}, status=400)
 
-    wishlist_item = WishList(customer=request.user, product=product)
-    wishlist_item.save()
+        wishlist_item_exists = WishList.objects.filter(device=device_id, product=product).exists()
+        if wishlist_item_exists:
+            return JsonResponse({'message': 'Product is already in your wishlist.'}, status=400)
 
-    return JsonResponse({'message': 'Product added to wishlist.'}, status=200)
+        wishlist_item = WishList(device=device_id, product=product)
+        wishlist_item.save()
+
+        return JsonResponse({'message': 'Product added to wishlist.'}, status=200)
+    else:
+        wishlist_item_exists = WishList.objects.filter(customer=request.user, product=product).exists()
+        if wishlist_item_exists:
+            return JsonResponse({'message': 'Product is already in your wishlist.'}, status=400)
+
+        wishlist_item = WishList(customer=request.user, product=product)
+        wishlist_item.save()
+
+        return JsonResponse({'message': 'Product added to wishlist.'}, status=200)
 
 def remove_from_wish_list(request, product_id):
-    # User authentication not added
     try:
         product = Product.objects.get(id=product_id)
     except Product.DoesNotExist:
         return JsonResponse({'message': 'Product does not exist.'}, status=404)
 
-    wishlist_item = WishList.objects.filter(customer=request.user, product=product)
+    if isinstance(request.user, AnonymousUser):
+        device_id = request.COOKIES.get('device_id')
+        if not device_id:
+            return JsonResponse({'message': 'Device ID not found.'}, status=400)
+
+        wishlist_item = WishList.objects.filter(device=device_id, product=product)
+    else:
+        wishlist_item = WishList.objects.filter(customer=request.user, product=product)
+
     if not wishlist_item.exists():
         return JsonResponse({'message': 'Product is not in your wishlist.'}, status=400)
 
@@ -428,12 +523,17 @@ def remove_from_wish_list(request, product_id):
     return JsonResponse({'message': 'Product removed from wishlist.'}, status=200)
 
 def get_wishlist_count(request):
-    count = WishList.objects.filter(customer=request.user).count()
+    if isinstance(request.user, AnonymousUser):
+        device_id = request.COOKIES.get('device_id')
+        if not device_id:
+            return JsonResponse({'count': 0})
+        
+        count = WishList.objects.filter(device=device_id).count()
+    else:
+        count = WishList.objects.filter(customer=request.user).count()
+
     return JsonResponse({'count': count})
 
-def get_cart_count(request):
-    count = CartItem.objects.filter(customer=request.user).count()
-    return JsonResponse({'count': count})
 
 @never_cache
 def order_dashboard(request):
@@ -515,7 +615,7 @@ def edit_customer(request, edit_id):
 
 
 
-# @never_cache
+@never_cache
 def coupon_dashboard(request):
     # if request.session.get('is_admin'):
         context = {

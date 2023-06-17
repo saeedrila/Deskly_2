@@ -52,3 +52,9 @@ class ProductForm(forms.ModelForm):
 class ExampleForm(forms.Form):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Name', 'class': 'form-control'}))
     email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder' :'Email', 'class': 'form-control'}))
+
+#Image cropping tool example
+class ImageForm(forms.ModelForm):
+      class Meta:
+            model = Image
+            fields = ('file',)

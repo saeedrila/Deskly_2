@@ -28,7 +28,11 @@
                         {% for item in wish_list_items %}
                         <tr>
                             <td class="product-thumbnail">
-                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="img-fluid">
+                                {% if item.product.image %}
+                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="img-fluid">
+                                {% else %}
+                                    <img src="/path/to/default/image.jpg" alt="Default Image" class="img-fluid">
+                                {% endif %}
                             </td>
                             <td class="product-name">{{ item.product.name }}</td>
                             <td>
