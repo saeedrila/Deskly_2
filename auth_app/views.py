@@ -6,7 +6,7 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.contrib import messages
 from django.views.decorators.cache import never_cache
-import time
+from django.views.decorators.csrf import csrf_protect
 from django.http import Http404, JsonResponse
 from django.core.paginator import Paginator
 from django.db.models import Q
@@ -314,7 +314,7 @@ def customer_orders_cancel(request, order_id):
     return render(request, "customer_orders_cancel.html", context)
 
 
-
+@csrf_protect
 def admin_login(request):
     context = {}
     user = request.user
