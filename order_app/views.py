@@ -453,7 +453,7 @@ def check_stock(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     stock_available = product.stock
     return JsonResponse({'stock': stock_available})
-
+#This is a sample line
 
 #Wishlist related methods
 def wish_list(request):
