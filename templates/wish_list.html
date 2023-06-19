@@ -28,10 +28,10 @@
                         {% for item in wish_list_items %}
                         <tr>
                             <td class="product-thumbnail">
-                                {% if item.product.image %}
-                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="img-fluid">
+                                {% if item.product.images.exists %}
+                                <img src="{{ item.product.images.first.image.url }}" alt="Product Image" style="width: 50px; height: 50px;">
                                 {% else %}
-                                    <img src="/path/to/default/image.jpg" alt="Default Image" class="img-fluid">
+                                <span>No image available</span>
                                 {% endif %}
                             </td>
                             <td class="product-name">{{ item.product.name }}</td>
