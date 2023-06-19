@@ -26,7 +26,7 @@ class Address(models.Model):
     title               = models.CharField(max_length=50, default='Title')
     name                = models.CharField(max_length=50)
     email               = models.EmailField(max_length=60)
-    line_1              = models.CharField(max_length=50)
+    line_1              = models.CharField(max_length=250)
 
     def __str__(self):
         return self.name
