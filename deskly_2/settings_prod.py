@@ -1,11 +1,11 @@
 from .settings import *
 
+DEBUG = False
+
 ALLOWED_HOSTS = ['.saeedrila.dev', 'saeedrila.dev', 'www.saeedrila.dev']
 CSRF_TRUSTED_ORIGINS = ['https://saeedrila.dev', 'https://www.saeedrila.dev']
 
 SESSION_COOKIE_SECURE = True
-
-LOGIN_REDIRECT_URL = 'home'
 
 LOGGING = {
     'version': 1,

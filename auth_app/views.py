@@ -13,7 +13,6 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
 
-
 from . forms import RegistrationForm, AccountAuthenticationForm, AccountUpdateForm
 from . models import *
 from product_app.models import *
@@ -386,6 +385,10 @@ def edit_customer(request, edit_id):
         return render(request, "edit_customer.html", context)
     else:
         return redirect('admin_login')
+
+#404 Error page
+def handler404(request, exception):
+    return render(request, '404.html')
 
 
 #Not used in production

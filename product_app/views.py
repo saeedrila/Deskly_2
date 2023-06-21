@@ -15,30 +15,31 @@ from order_app.models import *
 def shop_all(request):
     query = request.GET.get('search')
     selected_categories = request.GET.getlist('category[]')
-    try:
-        products = Product.objects.all()
-        if query:
-            products = products.filter(Q(name__icontains=query))
-        if selected_categories:
-            products = products.filter(category__id__in=selected_categories)
 
-        categories = Category.objects.all()
-        context = {
-            'products': products,
-            'categories': categories,
-            'selected_categories': selected_categories
-        }
-    except Product.DoesNotExist:
-        raise Http404("Product does not exist.")
-    
+    products = Product.objects.all()
+    if query:
+        products = products.filter(Q(name__icontains=query))
+    if selected_categories:
+        products = products.filter(category__id__in=selected_categories)
+
+    if not products.exists():
+        raise Http404("No products found.")
+
+    categories = Category.objects.all()
+    context = {
+        'products': products,
+        'categories': categories,
+        'selected_categories': selected_categories
+    }
+
     device_id = request.COOKIES.get('device_id')
     if not device_id:
         device_id = uuid.uuid4()
-        response = render(request, "shop_all.html", context)
-        response.set_cookie('device_id', device_id)
-        return response
+    
+    response = render(request, "shop_all.html", context)
+    response.set_cookie('device_id', device_id)
+    return response
 
-    return render(request, "shop_all.html", context)
 
 
 def product_page(request, product_id=None):
@@ -63,8 +64,9 @@ def product_page(request, product_id=None):
         else:
             print("No category offer found")
         context['product'] = product
+
     except Product.DoesNotExist:
-        print("Product does not exist")
+        return render(request, '404.html')
 
     except Product.DoesNotExist:
         raise Http404("Product does not exist.")

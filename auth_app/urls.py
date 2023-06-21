@@ -1,5 +1,9 @@
 from django.urls import path, include
 from . import views
+from auth_app.views import handler404
+
+#404 Error handler
+handler404 = handler404
 
 urlpatterns = [
     path('home',views.demo_home, name='demo_home'),
