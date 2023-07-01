@@ -183,7 +183,7 @@ def review_dashboard(request):
 def category_dashboard(request):
     if request.session.get('is_admin'):
         context = {
-            'categories': Category.objects.order_by('id'),
+            'categories': Category.objects.order_by('-is_active', 'id'),
         }
         return render(request, "category_dashboard.html", context)
     else:
@@ -205,6 +205,44 @@ def add_category(request):
         return redirect('category_dashboard')
     return redirect('category_dashboard')
 
+def edit_category(request):
+    if request.session.get('is_admin'):
+        if request.POST:
+            category_id = request.POST.get('category_id')
+            category_name = request.POST.get('category_name')
+            category_description = request.POST.get('category_description')
+            category_is_active = request.POST.get('category_is_active')
+            print('Enters edit category')
+
+            try:
+                category_obj = Category.objects.get(id=category_id)
+                category_obj.name = category_name
+                category_obj.description = category_description
+                category_obj.is_active = category_is_active
+                category_obj.save()
+                messages.success(request, 'Category successfully edited.')
+                print('category detials succesfully changed')
+                return redirect("category_dashboard")
+            except Category.DoesNotExist:
+                return redirect("category_dashboard")
+    else:
+        return redirect('admin_login')
+
+#Ajax category data fetching for edit modal
+def get_category_data(request):
+    category_id = request.GET.get('categoryId')
+    try:
+        category = Category.objects.get(id=category_id)
+        data = {
+            'name': category.name,
+            'description': category.description,
+            'is_active': category.is_active,
+            'image_url': category.image.url if category.image else None,
+            # Add any additional fields you want to include in the response
+        }
+        return JsonResponse(data)
+    except Category.DoesNotExist:
+        return JsonResponse({'error': 'Category not found'}, status=404)
 
 @never_cache
 def subcategory_dashboard(request):

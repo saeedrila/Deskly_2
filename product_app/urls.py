@@ -2,18 +2,24 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+#Product
     path('add-product',views.add_product, name='add_product'),
-    path('add-category',views.add_category, name='add_category'),
-
-    path('shop-all/',views.shop_all, name='shop_all'),
+    path('edit-product/<int:edit_id>',views.edit_product, name='edit_product'),
     path('product-page/<int:product_id>',views.product_page, name='product_page'),
     path('product-dashboard',views.product_dashboard, name='product_dashboard'),
-    path('edit-product/<int:edit_id>',views.edit_product, name='edit_product'),
-    path('review-dashboard',views.review_dashboard, name='review_dashboard'),
+    path('shop-all/',views.shop_all, name='shop_all'),
+
+#Category
+    path('add-category',views.add_category, name='add_category'),
+    path('edit-category/',views.edit_category, name='edit_category'),
+    path('get-category-data/', views.get_category_data, name='get_category_data'),
     path('category-dashboard',views.category_dashboard, name='category_dashboard'),
+
+#Subcategory
     path('subcategory-dashboard',views.subcategory_dashboard, name='subcategory_dashboard'),
 
-
+#Review
+    path('review-dashboard',views.review_dashboard, name='review_dashboard'),
 
 
 
