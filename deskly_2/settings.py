@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-^)27yaph#4*r&e!@0r02bp7@mz!xolaxsvd%j8h_)4i88#ooyh
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['13.235.65.146', 'saeedrila.dev', 'www.saeedrila.dev', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['13.235.65.146', 'saeedrila.dev', 'www.saeedrila.dev', 'localhost', '127.0.0.1', 'https://saeedrila.dev/']
 
 
 # Application definition
