@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Category Dashboard</title>
+  <title>Brand Dashboard</title>
   <link rel="shortcut icon" type="image/png" href="#" />
   <link rel="stylesheet" href="{% static 'modernize/css/styles.min.css' %}" />
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -35,7 +35,7 @@
                     <div class="alert alert-success">{{ message }}</div>
                 {% endfor %}
                 {% endif %} 
-                <button type="button" class="btn btn-info m-1" style="float:right;" data-bs-toggle="modal" data-bs-target="#addCategory" data-bs-whatever="@mdo">Add New Category</button>
+                <button type="button" class="btn btn-info m-1" style="float:right;" data-bs-toggle="modal" data-bs-target="#addBrand" data-bs-whatever="@mdo">Add New Brand</button>
             </div>
           <!-- Categories table -->
           <div class="col-lg-12 d-flex align-items-stretch">
@@ -55,61 +55,61 @@
                       </tr>
                     </thead>
                     <tbody>
-                        {% for category in categories %}
+                        {% for brand in brands %}
                         <tr>
-                            <td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{category.id}}</h6></td>
+                            <td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{brand.id}}</h6></td>
                             <td class="border-bottom-0">
                                 <h6 class="fw-semibold mb-1">
-                                    <img src="{{ category.image.url }}" alt="Product Image"  style="width: 50px; height: 50px;">
+                                    <img src="{{ brand.image.url }}" alt="Product Image"  style="width: 100px; height: 50px;">
                                 </h6>                        
                             </td>
                             <td class="border-bottom-0">
-                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#showCategory" data-bs-whatever="{{ category.id }}">{{category.name}}</button>
+                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#showBrand" data-bs-whatever="{{ brand.id }}">{{brand.name}}</button>
                             </td>
                             <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-1 text-truncate" style="max-width: 200px;">{{category.description}}</h6>                        
+                                <h6 class="fw-semibold mb-1 text-truncate" style="max-width: 200px;">{{brand.description}}</h6>                        
                             </td>
                             <td class="border-bottom-0">
                                 <div class="d-flex align-items-center gap-2">
-                                    <span class="badge {% if category.is_active %}bg-primary{% else %}bg-danger{% endif %} rounded-3 fw-semibold">
-                                        {% if category.is_active %}Active{% else %}Deleted{% endif %}
+                                    <span class="badge {% if brand.is_active %}bg-primary{% else %}bg-danger{% endif %} rounded-3 fw-semibold">
+                                        {% if brand.is_active %}Active{% else %}Deleted{% endif %}
                                     </span>
                                 </div>
                             </td>
                             <td class="border-bottom-0">
-                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editCategory" data-bs-whatever="{{ category.id }}">Edit</button>
+                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editBrand" data-bs-whatever="{{ brand.id }}">Edit</button>
                             </td>
                         </tr> 
                         {% endfor %}     
                     </tbody>
                   </table>
                 </div>
-                <!--  Add Category Modal -->
-                <div class="modal fade" id="addCategory" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <!--  Add Brand Modal -->
+                <div class="modal fade" id="addBrand" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="exampleModalLabel">Add Category</h5>
+                                <h5 class="modal-title" id="exampleModalLabel">Add Brand</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                            <form method="POST" action="{% url 'add_category' %}" enctype="multipart/form-data">
+                            <form method="POST" action="{% url 'add_brand' %}" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 <div class="mb-3">
-                                <label for="categoryName" class="form-label">Category Name</label>
-                                <input type="text" class="form-control" id="categoryName" name="category_name" required>
+                                <label for="brandName" class="form-label">Brand Name</label>
+                                <input type="text" class="form-control" id="brandName" name="brand_name" required>
                                 </div>
                                 <div class="mb-3">
-                                <label for="categoryDescription" class="form-label">Category Description</label>
-                                <textarea class="form-control" id="categoryDescription" name="category_description" rows="3" required></textarea>
+                                <label for="brandDescription" class="form-label">Brand Description</label>
+                                <textarea class="form-control" id="brandDescription" name="brand_description" rows="3" required></textarea>
                                 </div>
                                 <div class="mb-3">
-                                <label for="categoryImage" class="form-label">Category Image</label>
-                                <input type="file" class="form-control" id="categoryImage" name="category_image" required>
+                                <label for="brandImage" class="form-label">Brand Image</label>
+                                <input type="file" class="form-control" id="brandImage" name="brand_image" required>
                                 </div>
                                 <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                <button type="submit" class="btn btn-primary">Add Category</button>
+                                <button type="submit" class="btn btn-primary">Add Brand</button>
                                 </div>
                             </form>
                             </div>
@@ -118,57 +118,57 @@
                 </div>
                 <script>
                     $(document).ready(function() {
-                    var addCategoryButton = document.getElementById('addCategory');
-                    addCategoryButton.addEventListener('click', function() {
-                        var categoryModal = document.getElementById('categoryModal');
-                        var modalTitle = categoryModal.querySelector('.modal-title');
-                        modalTitle.textContent = 'Add Category';
+                    var addBrandButton = document.getElementById('addBrand');
+                    addBrandButton.addEventListener('click', function() {
+                        var brandModal = document.getElementById('brandModal');
+                        var modalTitle = brandModal.querySelector('.modal-title');
+                        modalTitle.textContent = 'Add Brand';
                     });
                     });
                 </script>
-                <!--  Edit Category Modal -->
-                <div class="modal fade" id="editCategory" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <!--  Edit Brand Modal -->
+                <div class="modal fade" id="editBrand" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="exampleModalLabel">Edit Category</h5>
+                                <h5 class="modal-title" id="exampleModalLabel">Edit Brand</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                            <form method="POST" action="{% url 'edit_category' %}" enctype="multipart/form-data">
+                            <form method="POST" action="{% url 'edit_brand' %}" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 <div class="mb-3">
-                                    <label for="categoryID" class="form-label">Category ID:</label>
-                                    <input type="text" class="form-control readonly" id="categoryID2" name="category_id" value="{{ category.id }}" readonly>
+                                    <label for="brandID" class="form-label">Brand ID:</label>
+                                    <input type="text" class="form-control readonly" id="brandID2" name="brand_id" value="{{ brand.id }}" readonly>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="categoryName" class="form-label">Category Name</label>
-                                    <input type="text" class="form-control" id="categoryName2" name="category_name" value="{{ category.name }}" required>
+                                    <label for="brandName" class="form-label">Brand Name</label>
+                                    <input type="text" class="form-control" id="brandName2" name="brand_name" value="{{ brand.name }}" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="categoryDescription" class="form-label">Category Description</label>
-                                    <textarea class="form-control" id="categoryDescription2" name="category_description" value="{{ category.description }}" rows="3" required></textarea>
+                                    <label for="brandDescription" class="form-label">Brand Description</label>
+                                    <textarea class="form-control" id="brandDescription2" name="brand_description" value="{{ brand.description }}" rows="3" required></textarea>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="categoryIsActive2" class="form-label">Category Is Active</label>
+                                    <label for="brandIsActive2" class="form-label">Brand Is Active</label>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="category_is_active" id="categoryActive" value="True" {% if category.is_active %}checked{% endif %}>
-                                        <label class="form-check-label" for="categoryActive">
+                                        <input class="form-check-input" type="radio" name="brand_is_active" id="brandActive" value="True" {% if brand.is_active %}checked{% endif %}>
+                                        <label class="form-check-label" for="brandActive">
                                             Active
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="category_is_active" id="categoryDeleted" value="False" {% if not category.is_active %}checked{% endif %}>
-                                        <label class="form-check-label" for="categoryDeleted">
+                                        <input class="form-check-input" type="radio" name="brand_is_active" id="brandDeleted" value="False" {% if not brand.is_active %}checked{% endif %}>
+                                        <label class="form-check-label" for="brandDeleted">
                                             Deleted
                                         </label>
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="categoryImage" class="form-label">Category Image</label>
+                                    <label for="brandImage" class="form-label">Brand Image</label>
                                 </div>
                                 <div class="mb-3">
-                                    <img id="categoryImage2" src="" alt="Category Image" style="width: 50px; height: 50px;">
+                                    <img id="brandImage2" src="" alt="brand Image" style="width: 50px; height: 50px;">
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -181,25 +181,25 @@
                 </div>
                 <script>
                     $(document).ready(function() {
-                    $('#editCategory').on('show.bs.modal', function(event) {
+                    $('#editBrand').on('show.bs.modal', function(event) {
                         var button = $(event.relatedTarget);
-                        var categoryId = button.data('bs-whatever');
+                        var brandId = button.data('bs-whatever');
                 
                         $.ajax({
-                        url: '/get-category-data/',
+                        url: '/get-brand-data/',
                         method: 'GET',
-                        data: { categoryId: categoryId },
+                        data: { brandId: brandId },
                         success: function(response) {
                             // Set the values of the form fields
-                            $('#categoryID2').val(categoryId); // Set the category ID
-                            $('#categoryName2').val(response.name);
-                            $('#categoryDescription2').val(response.description);
+                            $('#brandID2').val(brandId); // Set the brand ID
+                            $('#brandName2').val(response.name);
+                            $('#brandDescription2').val(response.description);
                             if (response.is_active) {
-                                $('#categoryActive').prop('checked', true);
+                                $('#brandActive').prop('checked', true);
                             } else {
-                                $('#categoryDeleted').prop('checked', true);
+                                $('#brandDeleted').prop('checked', true);
                             }
-                            $('#categoryImage2').attr('src', response.image_url);
+                            $('#brandImage2').attr('src', response.image_url);
                         },
                         error: function(xhr, status, error) {
                             console.error(error);
@@ -208,36 +208,36 @@
                     });
                     });
                 </script>
-                <!--  Show Category Modal -->
-                <div class="modal fade" id="showCategory" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <!--  Show Brand Modal -->
+                <div class="modal fade" id="showBrand" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="exampleModalLabel">Category</h5>
+                                <h5 class="modal-title" id="exampleModalLabel">Brand</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
                                 <div class="mb-3">
-                                    <label for="categoryID" class="form-label">Category ID:</label>
-                                    <input type="text" class="form-control readonly" id="categoryID3" name="category_id" value="{{ category.id }}" readonly>
+                                    <label for="brandID" class="form-label">Brand ID:</label>
+                                    <input type="text" class="form-control readonly" id="brandID3" name="brand_id" value="{{ brand.id }}" readonly>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="categoryName" class="form-label">Category Name</label>
-                                    <input type="text" class="form-control" id="categoryName3" name="category_name" value="{{ category.name }}" readonly>
+                                    <label for="brandName" class="form-label">Brand Name</label>
+                                    <input type="text" class="form-control" id="brandName3" name="brand_name" value="{{ brand.name }}" readonly>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="categoryDescription" class="form-label">Category Description</label>
-                                    <textarea class="form-control" id="categoryDescription3" name="category_description" value="{{ category.description }}" rows="3"></textarea>
+                                    <label for="brandDescription" class="form-label">Brand Description</label>
+                                    <textarea class="form-control" id="brandDescription3" name="brand_description" value="{{ brand.description }}" rows="3"></textarea>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="brandIsActive3" class="form-label">Category Status</label>
-                                    <input type="text" class="form-control readonly" id="categoryActive3" name="category_is_active" value="{{ category.is_active }}" readonly>
-                                </div>                             
-                                <div class="mb-3">
-                                    <label for="categoryImage" class="form-label">Category Image</label>
+                                    <label for="brandIsActive3" class="form-label">Brand Status</label>
+                                    <input type="text" class="form-control readonly" id="brandActive3" name="brand_is_active" value="{{ brand.is_active }}" readonly>
                                 </div>
                                 <div class="mb-3">
-                                    <img id="categoryImage3" src="" alt="Category Image" style="width: 50px; height: 50px;">
+                                    <label for="brandImage" class="form-label">Brand Image</label>
+                                </div>
+                                <div class="mb-3">
+                                    <img id="brandImage3" src="" alt="Brand Image" style="width: 100px; height: 50px;">
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -248,22 +248,21 @@
                 </div>
                 <script>
                     $(document).ready(function() {
-                    $('#showCategory').on('show.bs.modal', function(event) {
+                    $('#showBrand').on('show.bs.modal', function(event) {
                         var button = $(event.relatedTarget);
-                        var categoryId = button.data('bs-whatever');
+                        var brandId = button.data('bs-whatever');
                 
                         $.ajax({
-                        url: '/get-category-data/',
+                        url: '/get-brand-data/',
                         method: 'GET',
-                        data: { categoryId: categoryId },
+                        data: { brandId: brandId },
                         success: function(response) {
                             // Set the values of the form fields
-                            $('#categoryID3').val(categoryId); // Set the category ID
-                            $('#categoryName3').val(response.name);
-                            $('#categoryDescription3').val(response.description);
-                            $('#categoryActive3').val(response.is_active ? 'Category Is Active' : 'Category Is Deleted');
-
-                            $('#categoryImage3').attr('src', response.image_url);
+                            $('#brandID3').val(brandId); // Set the brand ID
+                            $('#brandName3').val(response.name);
+                            $('#brandDescription3').val(response.description);
+                            $('#brandActive3').val(response.is_active ? 'Brand Is Active' : 'Brand Is Deleted');
+                            $('#brandImage3').attr('src', response.image_url);
                         },
                         error: function(xhr, status, error) {
                             console.error(error);

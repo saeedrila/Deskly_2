@@ -8,6 +8,7 @@
   <title>Subcategory Dashboard</title>
   <link rel="shortcut icon" type="image/png" href="#" />
   <link rel="stylesheet" href="{% static 'modernize/css/styles.min.css' %}" />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
 <body>
@@ -29,74 +30,292 @@
         <div class="row">
             <div class="card-body p-4">
                 <div class="btn"><h1>Subcategories</h1></div>
-                <button type="button" class="btn btn-info m-1" style="float:right;">Add New Subcategory</button>
+                {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-success">{{ message }}</div>
+                {% endfor %}
+                {% endif %} 
+                <button type="button" class="btn btn-info m-1" style="float:right;" data-bs-toggle="modal" data-bs-target="#addSubcategory" data-bs-whatever="@mdo">Add New Subcategory</button>
             </div>
-          <!-- Recent Products Added -->
+          <!-- Subcategories table -->
           <div class="col-lg-12 d-flex align-items-stretch">
             <div class="card w-100">
               <div class="card-body p-4">
                 <h5 class="card-title fw-semibold mb-4"></h5>
                 <div class="table-responsive">
-                  <table class="table text-nowrap mb-0 align-middle">
+                  <table class="table text-nowrap mb-0 align-middle table-bordered table-hover">
                     <thead class="text-dark fs-4">
-                      <tr>
-                        <th class="border-bottom-0">
-                          <h6 class="fw-semibold mb-0">Id</h6>
-                        </th>
-                        <th class="border-bottom-0">
-                          <h6 class="fw-semibold mb-0">Category</h6>
-                        </th>
-                        <th class="border-bottom-0">
-                          <h6 class="fw-semibold mb-0">Subcategory</h6>
-                        </th>
-                        <th class="border-bottom-0">
-                          <h6 class="fw-semibold mb-0">Image</h6>
-                        </th>
-                        <th class="border-bottom-0">
-                          <h6 class="fw-semibold mb-0">Action</h6>
-                        </th>
-                      </tr>
+                        <tr>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Id</h6></th>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Image</h6></th>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Name</h6></th>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Description</h6></th>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Category</h6></th>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Is Active</h6></th>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Action</h6></th>
+                        </tr>
                     </thead>
                     <tbody>
                         {% for subcategory in subcategories %}
                         <tr>
                             <td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{subcategory.id}}</h6></td>
                             <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1">
+                                    <img src="{{ subcategory.image.url }}" alt="Product Image"  style="width: 50px; height: 50px;">
+                                </h6>
+                            </td>
+                            <td class="border-bottom-0">
+                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#showSubcategory" data-bs-whatever="{{ subcategory.id }}">{{subcategory.name}}</button>
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1 text-truncate" style="max-width: 200px;">{{subcategory.description}}</h6>                        
+                            </td>
+                            <td class="border-bottom-0">
                                 <h6 class="fw-semibold mb-1">{{subcategory.category.name}}</h6>                        
                             </td>
                             <td class="border-bottom-0">
-                              <h6 class="fw-semibold mb-1">{{subcategory.name}}</h6>                        
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge {% if subcategory.is_active %}bg-primary{% else %}bg-danger{% endif %} rounded-3 fw-semibold">
+                                        {% if subcategory.is_active %}Active{% else %}Deleted{% endif %}
+                                    </span>
+                                </div>
                             </td>
                             <td class="border-bottom-0">
-                              <h6 class="fw-semibold mb-1">
-                                  <img src="{{ subcategory.image.url }}" alt="Product Image"  style="width: 50px; height: 50px;">
-                              </h6>                        
+                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editSubcategory" data-bs-whatever="{{ subcategory.id }}">Edit</button>
                             </td>
-                            <td class="border-bottom-0">
-                              <h6 class="fw-semibold mb-1"><a href="#">Edit</a></h6>                        
-                          </td>
                         </tr> 
                         {% endfor %}     
                     </tbody>
                   </table>
                 </div>
+                <!--  Add Subcategory Modal -->
+                <div class="modal fade" id="addSubcategory" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Add Subcategory</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                            <form method="POST" action="{% url 'add_subcategory' %}" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="categoryName" class="form-label">Select Category</label>
+                                    <select class="form-control" id="categoryName" name="category_id" required>
+                                        {% for category in categories %}
+                                        <option value="{{category.id}}">{{category.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="subcategoryName" class="form-label">Name</label>
+                                    <input type="text" class="form-control" id="subcategoryName" name="subcategory_name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="subcategoryDescription" class="form-label">Subcategory Description</label>
+                                    <textarea class="form-control" id="subcategoryDescription" name="subcategory_description" rows="3" required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="subcategoryImage" class="form-label">Subategory Image</label>
+                                    <input type="file" class="form-control" id="subcategoryImage" name="subcategory_image" required>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Add Subcategory</button>
+                                </div>
+                            </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                    $(document).ready(function() {
+                        var addSubcategoryButton = document.getElementById('addSubcategory');
+                        addSubcategoryButton.addEventListener('click', function() {
+                            console.log('Entered addSubcategoryButton')
+                            var subcategoryModal = document.getElementById('addSubcategory');
+                            var modalTitle = subcategoryModal.querySelector('.modal-title');
+                            modalTitle.textContent = 'Add Subcategory';
+                        });
+                    });
+                </script>
+
+                <!--  Start of Subategory Modal edit works-->
+                <!--  Edit Subcategory Modal -->
+                <div class="modal fade" id="editSubcategory" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Edit Subcategory</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                            <form method="POST" action="{% url 'edit_subcategory' %}" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="subcategoryID" class="form-label">Subcategory ID:</label>
+                                    <input type="text" class="form-control readonly" id="subcategoryID2" name="subcategory_id" value="{{ subcategory.id }}" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="subcategoryName" class="form-label">Subcategory Name</label>
+                                    <input type="text" class="form-control" id="subcategoryName2" name="subcategory_name" value="{{ subcategory.name }}" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="categoryName" class="form-label">Category Name</label>
+                                    <input type="text" class="form-control" id="categoryNameDisplay" readonly>
+                                    {% comment %} <select class="form-control" id="categoryName2" name="category_name" value="{{subcategory.category.category_id}}"required readonly>
+                                        {% for category in categories %}
+                                            <option value="{{category.id}}" {% if category.id == subcategory.category_id %}selected{% endif %}>
+                                                {{ category.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select> {% endcomment %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="subcategoryDescription" class="form-label">Subcategory Description</label>
+                                    <textarea class="form-control" id="subcategoryDescription2" name="subcategory_description" value="{{ subcategory.description }}" rows="3" required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="subcategoryIsActive2" class="form-label">Subcategory Is Active</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="subcategory_is_active" id="subcategoryActive" value="True" {% if subcategory.is_active %}checked{% endif %}>
+                                        <label class="form-check-label" for="subcategoryActive">
+                                            Active
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="subcategory_is_active" id="subcategoryDeleted" value="False" {% if not subcategory.is_active %}checked{% endif %}>
+                                        <label class="form-check-label" for="subcategoryDeleted">
+                                            Deleted
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="subcategoryImage" class="form-label">Subcategory Image</label>
+                                </div>
+                                <div class="mb-3">
+                                    <img id="subcategoryImage2" src="" alt="Subcategory Image" style="width: 50px; height: 50px;">
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Save</button>
+                                </div>
+                            </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                    $(document).ready(function() {
+                    $('#editSubcategory').on('show.bs.modal', function(event) {
+                        var button = $(event.relatedTarget);
+                        var subcategoryId = button.data('bs-whatever');
+                
+                        $.ajax({
+                        url: '/get-subcategory-data/',
+                        method: 'GET',
+                        data: { subcategoryId: subcategoryId },
+                        success: function(response) {
+                            $('#subcategoryID2').val(subcategoryId);
+                            $('#subcategoryName2').val(response.name);
+                            $('#categoryName2').val(response.category_id).trigger('change');
+                            $('#categoryNameDisplay').val(response.category_name);
+                            $('#subcategoryDescription2').val(response.description);
+                            if (response.is_active) {
+                                $('#subcategoryActive').prop('checked', true);
+                            } else {
+                                $('#subcategoryDeleted').prop('checked', true);
+                            }
+                            $('#subcategoryImage2').attr('src', response.image_url);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(error);
+                        }
+                        });
+                    });
+                    });
+                </script>
+                <!--  Show Subcategory Modal -->
+                <div class="modal fade" id="showSubcategory" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Subcategory</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="subcategoryID" class="form-label">Subcategory ID:</label>
+                                    <input type="text" class="form-control readonly" id="subcategoryID3" name="subcategory_id" value="{{ subcategory.id }}" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="subcategoryName" class="form-label">Subcategory Name</label>
+                                    <input type="text" class="form-control" id="subcategoryName3" name="subcategory_name" value="{{ subcategory.name }}" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="categoryName" class="form-label">Category Name</label>
+                                    <input type="text" class="form-control" id="categoryName3" name="category_name" value="{{ category.name }}" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="subcategoryDescription" class="form-label">Subcategory Description</label>
+                                    <textarea class="form-control" id="subcategoryDescription3" name="subcategory_description" value="{{ subcategory.description }}" rows="3"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="brandIsActive3" class="form-label">Subcategory Status</label>
+                                    <input type="text" class="form-control readonly" id="subcategoryActive3" name="subcategory_is_active" value="{{ subcategory.is_active }}" readonly>
+                                </div>                             
+                                <div class="mb-3">
+                                    <label for="subcategoryImage" class="form-label">Subcategory Image</label>
+                                </div>
+                                <div class="mb-3">
+                                    <img id="subcategoryImage3" src="" alt="subcategory Image" style="width: 50px; height: 50px;">
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                    $(document).ready(function() {
+                    $('#showSubcategory').on('show.bs.modal', function(event) {
+                        var button = $(event.relatedTarget);
+                        var subcategoryId = button.data('bs-whatever');
+                        $.ajax({
+                        url: '/get-subcategory-data/',
+                        method: 'GET',
+                        data: { subcategoryId: subcategoryId },
+                        success: function(response) {
+                            $('#subcategoryID3').val(subcategoryId);
+                            $('#subcategoryName3').val(response.name);
+                            $('#categoryName3').val(response.category_name);
+                            $('#subcategoryDescription3').val(response.description);
+                            $('#subcategoryActive3').val(response.is_active ? 'Subcategory Is Active' : 'Subcategory Is Deleted');
+                            $('#subcategoryImage3').attr('src', response.image_url);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(error);
+                        }
+                        });
+                    });
+                    });
+                </script>
+                <!--  End of Subategory Modal edit works-->
+
               </div>
             </div>
           </div>
         </div>
         <div class="py-6 px-6 text-center">
-          <p class="mb-0 fs-4">Designed in India with &#10084 | 2023 | Deskly <a href="#" target="_blank" class="pe-1 text-primary text-decoration-underline"></a></p>
+            {%include 'snippets/admin_footer_copywrite.html'%}
         </div>
       </div>
     </div>
   </div>
-  <script src="{% static 'modernize/libs/jquery/dist/jquery.min.js' %}"></script>
-  <script src="{% static 'modernize/libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
-  <script src="{% static 'modernize/js/sidebarmenu.js' %}"></script>
-  <script src="{% static 'modernize/js/app.min.js' %}"></script>
-  <script src="{% static 'modernize/libs/apexcharts/dist/apexcharts.min.js' %}"></script>
-  <script src="{% static 'modernize/libs/simplebar/dist/simplebar.js' %}"></script>
-  <script src="{% static 'modernize/js/dashboard.js' %}"></script>
+  {%include 'snippets/admin_scripts.html'%}
 </body>
 
 </html>

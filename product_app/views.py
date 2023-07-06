@@ -5,8 +5,8 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.core.files.storage import default_storage
+from django.shortcuts import get_object_or_404
 import uuid
-
 
 from .forms import *
 from order_app.models import *
@@ -136,7 +136,7 @@ def edit_product(request, edit_id=None):
     if request.session.get('is_admin'):
         product_obj = Product.objects.get(id=edit_id)
         if request.POST:
-            product_obj.name = request.POST.get('name')
+            product_obj.name = request.POST.get('name')[:50]
             brand_id = request.POST.get('brand')
             category_id = request.POST.get('category_id')
             sub_category_id = request.POST.get('sub_category_id')
@@ -156,7 +156,7 @@ def edit_product(request, edit_id=None):
             except Subcategory.DoesNotExist:
                 pass
             product_obj.mrp = request.POST.get('mrp')
-            product_obj.availability = bool(request.POST.get('availability'))
+            product_obj.availability = request.POST.get('availability')
             product_obj.stock = request.POST.get('stock')
             product_obj.sell_count = request.POST.get('sell_count')
             product_obj.save()
@@ -169,6 +169,8 @@ def edit_product(request, edit_id=None):
     else:
         return redirect('admin_login')
 
+
+#Review dashboard (Not using at the moment)
 @never_cache
 def review_dashboard(request):
     if request.session.get('is_admin'):
@@ -179,6 +181,73 @@ def review_dashboard(request):
     else:
         return redirect("admin_login")
 
+
+#Brand related functions(Need editing)
+@never_cache
+def brand_dashboard(request):
+    if request.session.get('is_admin'):
+        context = {
+            'brands': Brand.objects.order_by('-is_active', 'id'),
+        }
+        return render(request, "brand_dashboard.html", context)
+    else:
+        return redirect("admin_login")
+
+def add_brand(request):
+    if request.method == 'POST':
+        brand_name = request.POST.get('brand_name')
+        brand_description = request.POST.get('brand_description')
+        brand_image = request.FILES.get('brand_image')
+        brand = Brand(name=brand_name, description=brand_description)
+
+        filename = default_storage.get_available_name(brand_image.name)
+        path = default_storage.save(filename, brand_image)
+
+        brand.image = path
+        brand.save()
+        messages.success(request, 'New brand has been created successfully.')
+        return redirect('brand_dashboard')
+    return redirect('brand_dashboard')
+
+def edit_brand(request):
+    if request.session.get('is_admin'):
+        if request.POST:
+            brand_id = request.POST.get('brand_id')
+            brand_name = request.POST.get('brand_name')
+            brand_description = request.POST.get('brand_description')
+            brand_is_active = request.POST.get('brand_is_active')
+            print('Enters edit brand')
+            print(brand_id)
+
+            brand_obj = get_object_or_404(Brand, id=brand_id)
+            brand_obj.name = brand_name
+            brand_obj.description = brand_description
+            brand_obj.is_active = brand_is_active
+            brand_obj.save()
+            messages.success(request, 'Brand successfully edited.')
+            print('brand detials succesfully changed')
+            return redirect("brand_dashboard")
+    else:
+        return redirect('admin_login')
+
+#Ajax brand data fetching for edit modal
+def get_brand_data(request):
+    brand_id = request.GET.get('brandId')
+    try:
+        brand = Brand.objects.get(id=brand_id)
+        data = {
+            'name': brand.name,
+            'description': brand.description,
+            'is_active': brand.is_active,
+            'image_url': brand.image.url if brand.image else None,
+            # Add any additional fields you want to include in the response
+        }
+        return JsonResponse(data)
+    except Brand.DoesNotExist:
+        return JsonResponse({'error': 'Brand not found'}, status=404)
+
+
+#Category related functions
 @never_cache
 def category_dashboard(request):
     if request.session.get('is_admin'):
@@ -188,7 +257,7 @@ def category_dashboard(request):
         return render(request, "category_dashboard.html", context)
     else:
         return redirect("admin_login")
-    
+
 def add_category(request):
     if request.method == 'POST':
         category_name = request.POST.get('category_name')
@@ -228,7 +297,7 @@ def edit_category(request):
     else:
         return redirect('admin_login')
 
-#Ajax category data fetching for edit modal
+#Ajax category data fetching for edit modal of category
 def get_category_data(request):
     category_id = request.GET.get('categoryId')
     try:
@@ -238,24 +307,86 @@ def get_category_data(request):
             'description': category.description,
             'is_active': category.is_active,
             'image_url': category.image.url if category.image else None,
-            # Add any additional fields you want to include in the response
         }
         return JsonResponse(data)
     except Category.DoesNotExist:
         return JsonResponse({'error': 'Category not found'}, status=404)
 
+
+#Subcategory related functions
 @never_cache
 def subcategory_dashboard(request):
     if request.session.get('is_admin'):
         context = {
             'subcategories': Subcategory.objects.order_by('-id'),
+            'categories': Category.objects.order_by('-id')
         }
         return render(request, "subcategory_dashboard.html", context)
     else:
         return redirect("admin_login")
 
 
-#Dependent drop down menu
+def add_subcategory(request):
+    if request.method == 'POST':
+        subcategory_name = request.POST.get('subcategory_name')
+        subcategory_description = request.POST.get('subcategory_description')
+        subcategory_image = request.FILES.get('subcategory_image')
+        category_id = request.POST.get('category_id')
+        subcategory = Subcategory(name=subcategory_name, description=subcategory_description, category_id=category_id)
+
+        filename = default_storage.get_available_name(subcategory_image.name)
+        path = default_storage.save(filename, subcategory_image)
+
+        subcategory.image = path
+        subcategory.save()
+        messages.success(request, 'New subcategory has been created successfully.')
+        return redirect('subcategory_dashboard')
+    return redirect('subcategory_dashboard')
+
+
+def edit_subcategory(request):
+    if request.session.get('is_admin'):
+        if request.POST:
+            subcategory_id = request.POST.get('subcategory_id')
+            subcategory_name = request.POST.get('subcategory_name')
+            subcategory_description = request.POST.get('subcategory_description')
+            subcategory_is_active = request.POST.get('subcategory_is_active')
+            print('Enters edit subcategory')
+
+            try:
+                subcategory_obj = Subcategory.objects.get(id=subcategory_id)
+                subcategory_obj.name = subcategory_name
+                subcategory_obj.description = subcategory_description
+                subcategory_obj.is_active = subcategory_is_active
+                subcategory_obj.save()
+                messages.success(request, 'Subcategory successfully edited.')
+                print('subcategory detials succesfully changed')
+                return redirect("subcategory_dashboard")
+            except Subcategory.DoesNotExist:
+                return redirect("subcategory_dashboard")
+    else:
+        return redirect('admin_login')
+
+
+#Ajax subcategory data fetching for edit modal
+def get_subcategory_data(request):
+    subcategory_id = request.GET.get('subcategoryId')
+    try:
+        subcategory = Subcategory.objects.get(id=subcategory_id)
+        data = {
+            'name': subcategory.name,
+            'category_name': subcategory.category.name,
+            'description': subcategory.description,
+            'is_active': subcategory.is_active,
+            'image_url': subcategory.image.url if subcategory.image else None,
+            # Add any additional fields you want to include in the response
+        }
+        return JsonResponse(data)
+    except Subcategory.DoesNotExist:
+        return JsonResponse({'error': 'Subcategory not found'}, status=404)
+
+
+#Dependent drop down menu for category and subcategory
 def get_subcategories(request):
     category_id = request.GET.get('category_id')
     subcategories = Subcategory.objects.filter(category_id=category_id).values('id', 'name')
@@ -265,6 +396,9 @@ def get_subcategories(request):
     }
     print(context)
     return JsonResponse(context, safe=False)
+
+
+
 
 
 #Sample methods

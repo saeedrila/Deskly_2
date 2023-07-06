@@ -87,93 +87,74 @@
                     
                   <table class="table text-nowrap mb-0 align-middle table-bordered table-hover">
                     <thead class="text-dark fs-4">
-                      <tr>
-                        <th class="border-bottom-0">
-                          <h6 class="fw-semibold mb-0">Id</h6>
-                        </th>
-                        <th class="border-bottom-0">
-                          <h6 class="fw-semibold mb-0">Image</h6>
-                        </th>
-                        <th class="border-bottom-0">
-                          <h6 class="fw-semibold mb-0">Name</h6>
-                        </th>
-                        <th class="border-bottom-0">
-                          <h6 class="fw-semibold mb-0">Brand</h6>
-                        </th>
-                        <th class="border-bottom-0">
-                          <h6 class="fw-semibold mb-0">Category</h6>
-                        </th>
-                        <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0">Subcategory</h6>
-                          </th>
-                          <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0">MRP</h6>
-                          </th>
-                          <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0">Availability</h6>
-                          </th>
-                          <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0">Stock</h6>
-                          </th>
-                          <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0">Sold</h6>
-                          </th>
-                          <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0">Date added</h6>
-                          </th>
-
-                          <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0">Action</h6>
-                          </th>
-                      </tr>
+                        <tr>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Id</h6></th>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Image</h6></th>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Name</h6></th>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Description</h6></th>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Brand</h6></th>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Category</h6></th>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Subcategory</h6></th>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">MRP</h6></th>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Availability</h6></th>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Stock</h6></th>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Sold</h6></th>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Date added</h6></th>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Action</h6></th>
+                        </tr>
                     </thead>
                     <tbody>
-                      {% for product in products %}
-                      <tr>
-                          <td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{product.id}}</h6></td>
-                          <td class="border-bottom-0">
-                            <h6 class="fw-semibold mb-1">
-                                {% if product.images.exists %}
-                                    <img src="{{ product.images.first.image.url }}" alt="Product Image" style="width: 50px; height: 50px;">
-                                {% else %}
-                                    <span>No image available</span>
-                                {% endif %}
-                            </h6>                        
-                          </td>
-                          <td class="border-bottom-0">
-                              <h6 class="fw-semibold mb-1">{{product.name}}</h6>                        
-                          </td>
-                          <td class="border-bottom-0">
-                              <h6 class="fw-semibold mb-1">{{product.brand.name}}</h6>                        
-                          </td>
-                          <td class="border-bottom-0">
-                              <h6 class="fw-semibold mb-1">{{product.category.name}}</h6>                        
-                          </td>
-                          <td class="border-bottom-0">
-                              <h6 class="fw-semibold mb-1">{{product.sub_category.name}}</h6>                        
-                          </td>
-                          <td class="border-bottom-0">
-                              <h6 class="fw-semibold mb-1">{{product.mrp}}</h6>                        
-                          </td>
-                          <td class="border-bottom-0">
-                          <div class="d-flex align-items-center gap-2">
-                              <span class="badge bg-primary rounded-3 fw-semibold">{{product.availability}}</span>
-                          </div>
-                          </td>
-                          <td class="border-bottom-0">
-                              <h6 class="fw-semibold mb-1">{{product.stock}}</h6>                        
-                          </td>
-                          <td class="border-bottom-0">
-                              <h6 class="fw-semibold mb-1">{{product.sell_count}}</h6>                        
-                          </td>
-                          <td class="border-bottom-0">
-                              <h6 class="fw-semibold mb-1">{{product.date_added}}</h6>                        
-                          </td>
-                          <td class="border-bottom-0">
-                              <h6 class="fw-semibold mb-1"><a href="{% url 'edit_product' product.id %}">Edit</a></h6>                        
-                          </td>
-                      </tr> 
-                      {% endfor %}     
+                        {% for product in products %}
+                        <tr>
+                            <td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{product.id}}</h6></td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1">
+                                    {% for image in product.images.all %}
+                                        <img src="{{ image.image.url }}" alt="Product Image" style="width: 50px; height: 50px;">
+                                        {% empty %}
+                                        <span>No image available</span>
+                                    {% endfor %}
+                                </h6>                        
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1">{{product.name}}</h6>                        
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1 text-truncate" style="max-width: 200px;">{{product.description}}</h6>                        
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1">{{product.brand.name}}</h6>                        
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1">{{product.category.name}}</h6>                        
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1">{{product.sub_category.name}}</h6>                        
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1">{{product.mrp}}</h6>                        
+                            </td>
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+                                <span class="badge {% if product.availability %}bg-primary{% else %}bg-danger{% endif %} rounded-3 fw-semibold">
+                                    {% if product.availability %}Active{% else %}Not Available{% endif %}
+                                </span>
+                                </div>
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1">{{product.stock}}</h6>                        
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1">{{product.sell_count}}</h6>                        
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1">{{product.date_added}}</h6>                        
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1"><a href="{% url 'edit_product' product.id %}">Edit</a></h6>                        
+                            </td>
+                        </tr> 
+                        {% endfor %}     
                   </tbody>
                   </table>
                 </div>

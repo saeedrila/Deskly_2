@@ -16,7 +16,6 @@ class Subcategory(models.Model):
 	image = models.ImageField(upload_to='sub_categories')
 	is_active = models.BooleanField(default=True)
 
-
 	def __str__(self):
 		return self.name
 
@@ -24,6 +23,9 @@ class Brand(models.Model):
 	name = models.CharField(max_length=50)
 	description = models.TextField()
 	image = models.ImageField(upload_to='brands')
+	is_active = models.BooleanField(default=True)
+	offer_is_active = models.BooleanField(default=False)
+	offer_percentage = models.PositiveIntegerField(default=0)
 
 	def __str__(self):
 		return self.name
