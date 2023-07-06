@@ -1,0 +1,35 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Product Page</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        {% include 'snippets/dependencies_customer_header.html' %}
+    </head>
+    <body> 
+        <div class="site-wrap">
+            {% include 'header.html' %}
+            <div class="site-section">
+                <div class="container">
+                    <div class="row">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <div class="col-lg-6">
+                                <div class="card overflow-hidden">
+                                    <div class="card-body p-4 text-center">
+                                        <h5 class="card-title mb-9 fw-semibold">We are sorry. The page you requested could not be found.</h5>
+                                        <h6 class="fw-semibold mb-3">404 Error</h6>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer class="site-footer custom-border-top">
+                {% include 'footer.html' %}
+            </footer>
+        </div>         
+        {% include 'snippets/dependencies_customer_footer.html' %}
+    </body>
+</html>

@@ -12,27 +12,6 @@
         <div class="main-nav d-none d-lg-block">
             <nav class="site-navigation text-right text-md-center" role="navigation">
             <ul class="site-menu js-clone-nav d-none d-lg-block">
-                {% comment %} <li class="has-children active">
-                    <a href="#">Categories</a>
-                    <ul class="dropdown">
-                        <li class="has-children">
-                            <a href="#">Category_1</a>
-                            <ul class="dropdown">
-                                <li><a href="#">Sub_category_1</a></li>
-                                <li><a href="#">Sub_category_2</a></li>
-                                <li><a href="#">Sub_category_2</a></li>
-                            </ul>
-                        </li>
-                        <li class="has-children">
-                            <a href="#">Category_2</a>
-                            <ul class="dropdown">
-                                <li><a href="#">Sub_category_1</a></li>
-                                <li><a href="#">Sub_category_2</a></li>
-                                <li><a href="#">Sub_category_2</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li> {% endcomment %}
                 <li><a href="{% url 'shop_all' %}">Shop All</a></li>
                 {% if request.user.is_authenticated %}
                 <li><a href="#">Hi {{request.user.username}}</a></li>
@@ -86,60 +65,69 @@
       }
       return cookieValue;
     }
-    
+    // Listen for the 'cartCountUpdated' event
+    document.addEventListener('cartCountUpdated', function() {
+        // Update the cart quantity number in the header
+        var cartCount = document.getElementById('cart-count').textContent;
+        // Perform any necessary updates with the cartCount value
+        // For example, update the superscript value in the header
+    });
     // Function to update wishlist and cart counts
     function updateCounts() {
-      var csrfToken = getCookie('csrftoken'); // Retrieve the CSRF token from cookies
-    
-      // Fetch wishlist count
-      fetch('/get-wishlist-count/', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken // Include the CSRF token in the request headers
-        },
-        credentials: 'same-origin' // Include cookies in the request if needed
-      })
-      .then(function(response) {
-        return response.json(); // Parse the response as JSON
-      })
-      .then(function(data) {
-        // Handle the response data here
-        console.log(data); // Log the response data to the console for debugging
-    
-        // Update wishlist count
-        document.getElementById('wishlist-count').textContent = data.count;
-      })
-      .catch(function(error) {
-        // Handle any error that occurred during the request
-        console.error('Error:', error);
-      });
-    
-      // Fetch cart count
-      fetch('/get-cart-count/', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken // Include the CSRF token in the request headers
-        },
-        credentials: 'same-origin' // Include cookies in the request if needed
-      })
-      .then(function(response) {
-        return response.json(); // Parse the response as JSON
-      })
-      .then(function(data) {
-        // Handle the response data here
-        console.log(data); // Log the response data to the console for debugging
-    
-        // Update cart count
-        document.getElementById('cart-count').textContent = data.count;
-      })
-      .catch(function(error) {
-        // Handle any error that occurred during the request
-        console.error('Error:', error);
-      });
-    }
-    
+        var csrfToken = getCookie('csrftoken'); // Retrieve the CSRF token from cookies
+      
+        // Fetch wishlist count
+        fetch('/get-wishlist-count/', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken // Include the CSRF token in the request headers
+          },
+          credentials: 'same-origin' // Include cookies in the request if needed
+        })
+        .then(function(response) {
+          return response.json(); // Parse the response as JSON
+        })
+        .then(function(data) {
+          // Handle the response data here
+          console.log(data); // Log the response data to the console for debugging
+      
+          // Update wishlist count
+          document.getElementById('wishlist-count').textContent = data.count;
+        })
+        .catch(function(error) {
+          // Handle any error that occurred during the request
+          console.error('Error:', error);
+        });
+      
+        // Fetch cart count
+        fetch('/get-cart-count/', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken // Include the CSRF token in the request headers
+          },
+          credentials: 'same-origin' // Include cookies in the request if needed
+        })
+        .then(function(response) {
+          return response.json(); // Parse the response as JSON
+        })
+        .then(function(data) {
+          // Handle the response data here
+          console.log(data); // Log the response data to the console for debugging
+      
+          // Update cart count
+          document.getElementById('cart-count').textContent = data.count;
+      
+          // Trigger an event to notify the cart count update
+          var cartCountUpdatedEvent = new Event('cartCountUpdated');
+          document.dispatchEvent(cartCountUpdatedEvent);
+        })
+        .catch(function(error) {
+          // Handle any error that occurred during the request
+          console.error('Error:', error);
+        });
+      }      
     // Call the updateCounts function initially to set the initial counts
     updateCounts();
     </script>

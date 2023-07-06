@@ -75,33 +75,93 @@
             </footer>
         </div>
         <script>
+            function addToCart(productId) {
+              var csrfToken = getCookie('csrftoken');
+              fetch('/add-to-cart/' + productId + '/', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRFToken': csrfToken
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({})
+              })
+              .then(function(response) {
+                return response.json();
+              })
+              .then(function(data) {
+                console.log(data.message);
+                updateCounts();
+              })
+              .catch(function(error) {
+                console.error('Error:', error);
+              });
+            }      
             function addToWishList(productId) {
-              var csrfToken = getCookie('csrftoken'); // Function to retrieve the CSRF token from cookies
-            
+              var csrfToken = getCookie('csrftoken');
               fetch('/add-to-wish-list/' + productId + '/', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
-                  'X-CSRFToken': csrfToken // Include the CSRF token in the request headers
+                  'X-CSRFToken': csrfToken
                 },
-                credentials: 'same-origin', // Include cookies in the request if needed
-                body: JSON.stringify({}) // Empty request body or you can include additional data if required
+                credentials: 'same-origin',
+                body: JSON.stringify({})
               })
               .then(function(response) {
-                return response.json(); // Parse the response as JSON
+                return response.json();
               })
               .then(function(data) {
-                // Handle the response data here
-                console.log(data.message); // Log the message to the console or display it on the page
-            
-                // You can perform any additional actions based on the response, such as updating the UI
+                console.log(data.message);
+                updateCounts();
               })
               .catch(function(error) {
-                // Handle any error that occurred during the request
                 console.error('Error:', error);
               });
             }
-            // Function to retrieve the CSRF token from cookies
+            function updateCounts() {
+                var csrfToken = getCookie('csrftoken');
+                fetch('/get-wishlist-count/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                credentials: 'same-origin'
+                })
+                .then(function(response) {
+                return response.json();
+                })
+                .then(function(data) {
+                console.log(data);
+                document.getElementById('wishlist-count').textContent = data.count;
+                })
+                .catch(function(error) {
+                console.error('Error:', error);
+                });
+                fetch('/get-cart-count/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                credentials: 'same-origin'
+                })
+                .then(function(response) {
+                return response.json();
+                })
+                .then(function(data) {
+                console.log(data);
+                // Update cart count
+                document.getElementById('cart-count').textContent = data.count;
+                var cartCountUpdatedEvent = new Event('cartCountUpdated');
+                document.dispatchEvent(cartCountUpdatedEvent);
+                })
+                .catch(function(error) {
+                console.error('Error:', error);
+                });
+                console.log('Updating counts...');
+            }        
             function getCookie(name) {
               var cookieValue = null;
               if (document.cookie && document.cookie !== '') {
@@ -116,49 +176,6 @@
               }
               return cookieValue;
             }
-        </script>
-        <script>
-          function addToCart(productId) {
-            var csrfToken = getCookie('csrftoken'); // Function to retrieve the CSRF token from cookies
-            fetch('/add-to-cart/' + productId + '/', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken // Include the CSRF token in the request headers
-              },
-              credentials: 'same-origin', // Include cookies in the request if needed
-              body: JSON.stringify({}) // Empty request body or you can include additional data if required
-            })
-            .then(function(response) {
-              return response.json(); // Parse the response as JSON
-            })
-            .then(function(data) {
-              // Handle the response data here
-              console.log(data.message); // Log the message to the console or display it on the page
-        
-              // You can perform any additional actions based on the response, such as updating the UI
-            })
-            .catch(function(error) {
-              // Handle any error that occurred during the request
-              console.error('Error:', error);
-            });
-          }
-        
-          // Function to retrieve the CSRF token from cookies
-          function getCookie(name) {
-            var cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-              var cookies = document.cookie.split(';');
-              for (var i = 0; i < cookies.length; i++) {
-                var cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                  break;
-                }
-              }
-            }
-            return cookieValue;
-          }
         </script>
         <script>
             $(document).ready(function() {

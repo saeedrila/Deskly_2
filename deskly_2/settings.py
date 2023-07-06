@@ -145,7 +145,7 @@ if os.environ.get('SERVER_SOFTWARE', '').startswith('nginx'):
     STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
 else:
     # Running locally
-    STATIC_URL = 'static/'
+    STATIC_URL = '/static/'
     STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
     STATICFILES_DIRS = [
         os.path.join(BASE_DIR, 'static')

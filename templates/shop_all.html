@@ -27,34 +27,6 @@
                                 </form>
                             </div>
 
-                            {% comment %} <div class="border-bottom mb-4 pb-4">
-                                <h5 class="font-weight-semi-bold mb-4">Filter by Categories</h5>
-                                <form method="get" action="{% url 'userproduct' %}">
-                                    {% csrf_token %}
-                                    <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                                        <input type="checkbox" class="custom-control-input category-checkbox" id="color-1" name="category" value="Large Plants and Trees" {% if 'Large Plants and Trees' in selected_categories %}checked{% endif %}>
-                                        <label class="custom-control-label" for="color-1">Large Plants & Trees</label>
-                                    </div>
-                                    <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                                        <input type="checkbox" class="custom-control-input category-checkbox" id="color-2" name="category" value="Flowering Plants" {% if 'Flowering Plants' in selected_categories %}checked{% endif %}>
-                                        <label class="custom-control-label" for="color-2">Flowering Plants</label>
-                                    </div>
-                                    <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                                        <input type="checkbox" class="custom-control-input category-checkbox" id="color-3" name="category" value="Faux and Preserved" {% if 'Faux and Preserved' in selected_categories %}checked{% endif %}>
-                                        <label class="custom-control-label" for="color-3">Faux & Preserved Plants</label>
-                                    </div>
-                                    <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                                        <input type="checkbox" class="custom-control-input category-checkbox" id="color-4" name="category" value="Pet-Friendly Plants" {% if 'Pet-Friendly Plants' in selected_categories %}checked{% endif %}>
-                                        <label class="custom-control-label" for="color-4">Pet-Friendly Plants</label>
-                                    </div>
-                                    <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                                        <input type="checkbox" class="custom-control-input category-checkbox" id="color-5" name="category" value="For-Beginers" {% if 'For-Beginers' in selected_categories %}checked{% endif %}>
-                                        <label class="custom-control-label" for="color-5">For Beginners</label>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">Apply</button>
-                                </form>
-                            </div> {% endcomment %}
-
                             {% comment %}<div class="border p-4 rounded mb-4">
                                 <div class="mb-4">
                                     <h3 class="mb-3 h6 text-uppercase text-black d-block">Filter by Price</h3>
@@ -140,21 +112,6 @@
                                 </div>
                                 {% endfor %}
                             </div>
-                            {% comment %} <div class="row">
-                                <div class="col-md-12 text-center">
-                                    <div class="site-block-27">
-                                        <ul>
-                                            <li><a href="#">&lt;</a></li>
-                                            <li class="active"><span>1</span></li>
-                                            <li><a href="#">2</a></li>
-                                            <li><a href="#">3</a></li>
-                                            <li><a href="#">4</a></li>
-                                            <li><a href="#">5</a></li>
-                                            <li><a href="#">&gt;</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div> {% endcomment %}
                         </div>
                     </div>
                 </div>
@@ -180,27 +137,12 @@
               })
               .then(function(data) {
                 console.log(data.message);
+                updateCounts();
               })
               .catch(function(error) {
                 console.error('Error:', error);
               });
-            }
-            function getCookie(name) {
-                var cookieValue = null;
-                if (document.cookie && document.cookie !== '') {
-                    var cookies = document.cookie.split(';');
-                    for (var i = 0; i < cookies.length; i++) {
-                    var cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                    }
-                }
-                return cookieValue;
-            }
-        </script>
-        <script>
+            }      
             function addToWishList(productId) {
               var csrfToken = getCookie('csrftoken');
               fetch('/add-to-wish-list/' + productId + '/', {
@@ -217,11 +159,55 @@
               })
               .then(function(data) {
                 console.log(data.message);
+                updateCounts();
               })
               .catch(function(error) {
                 console.error('Error:', error);
               });
             }
+            function updateCounts() {
+                var csrfToken = getCookie('csrftoken');
+                fetch('/get-wishlist-count/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                credentials: 'same-origin'
+                })
+                .then(function(response) {
+                return response.json();
+                })
+                .then(function(data) {
+                console.log(data);
+                document.getElementById('wishlist-count').textContent = data.count;
+                })
+                .catch(function(error) {
+                console.error('Error:', error);
+                });
+                fetch('/get-cart-count/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                credentials: 'same-origin'
+                })
+                .then(function(response) {
+                return response.json();
+                })
+                .then(function(data) {
+                console.log(data);
+                // Update cart count
+                document.getElementById('cart-count').textContent = data.count;
+                var cartCountUpdatedEvent = new Event('cartCountUpdated');
+                document.dispatchEvent(cartCountUpdatedEvent);
+                })
+                .catch(function(error) {
+                console.error('Error:', error);
+                });
+                console.log('Updating counts...');
+            }        
             function getCookie(name) {
               var cookieValue = null;
               if (document.cookie && document.cookie !== '') {
@@ -237,7 +223,6 @@
               return cookieValue;
             }
         </script>
-        
         {% include 'snippets/dependencies_customer_footer.html'%}
     </body>
 </html>
