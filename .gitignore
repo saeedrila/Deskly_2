@@ -1,0 +1,8 @@
+# Environement variables
+.env
+
+# VS Code files
+.vscode
+
+# Media files
+media/
