@@ -6,3 +6,9 @@
 
 # Media files
 media/
+
+# Row files 
+deskly_row_image/
+
+# MacOS hidden files
+.DS_Store
