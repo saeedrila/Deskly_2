@@ -12,7 +12,6 @@ from django.db.models import Q
 import json
 from decimal import Decimal
 from django.contrib.auth.models import AnonymousUser
-
 import razorpay
 
 from product_app.models import *
@@ -231,7 +230,7 @@ def checkout_payment(request, address_id=1):
                     try:
                         # Razorpay
                         amount = int(net_total) * 100
-                        client = razorpay.Client(auth =("rzp_test_WGlv594z1DLEPO","rSzkwzdBivOZmQK0xu4q3UeD"))
+                        client = razorpay.Client(auth =(settings.RAZORPAY_KEY,settings.RAZORPAY_SECRET))
                         payment = client.order.create ({'amount' : amount, 'currency': 'INR', 'payment_capture': '1'})
 
                         print('********** Razorpay Integration **********')
@@ -699,7 +698,7 @@ def razorpay_demo(request):
     if request.method == "POST":
         name = request. POST .get ("name")
         amount = int(request.POST. get ("amount")) * 100
-        client = razorpay.Client(auth =("rzp_test_WGlv594z1DLEPO","rSzkwzdBivOZmQK0xu4q3UeD"))
+        client = razorpay.Client(auth =(settings.RAZORPAY_KEY,settings.RAZORPAY_SECRET))
         payment = client.order.create ({'amount' : amount, 'currency': 'INR', 'payment_capture': '1'})
         print(payment)
         purchase = RazorpayDemo(name = name , amount=amount, payment_id = payment ['id' ])

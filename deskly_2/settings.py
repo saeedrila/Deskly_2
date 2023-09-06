@@ -1,4 +1,5 @@
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -8,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-^)27yaph#4*r&e!@0r02bp7@mz!xolaxsvd%j8h_)4i88#ooyh'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -72,7 +73,7 @@ TEMPLATES = [
     },
 ]
 
-# Very important#
+# Very important should do before first migration
 AUTH_USER_MODEL = 'auth_app.Account'
 
 WSGI_APPLICATION = 'deskly_2.wsgi.application'
@@ -83,12 +84,12 @@ WSGI_APPLICATION = 'deskly_2.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'deskly_2',
-        'USER': 'postgres',
-        'PASSWORD': '1234',
-        'HOST': 'localhost',
-        'PORT': '5432'
+        'ENGINE': config('DB_ENGINE'),
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT'),
     }
 }
 
@@ -150,15 +151,15 @@ DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #Razorpay Payment Configuration
-KEY = 'rzp_test_WGlv594z1DLEPO'
-SECRET = 'rSzkwzdBivOZmQK0xu4q3UeD'
+RAZORPAY_KEY = config('RAZORPAY_KEY')
+RAZORPAY_SECRET = config('RAZORPAY_SECRET')
 
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'APP': {
-            'client_id': '25014805493-0ci9d3qsdr2iuekfmtaj3g8ohhpdmqd7.apps.googleusercontent.com',
-            'secret': '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',
+            'client_id': config('GOOGLE_CLIENT_ID'),
+            'secret': config('GOOGLE_SECRET'),
             'key': ''
         }
     }
