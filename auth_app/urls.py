@@ -12,7 +12,7 @@ urlpatterns = [
     path('customer-login/',views.customer_login, name='customer_login'),
     path('',views.home, name='home'),
 
-    path('admin-login',views.admin_login, name='admin_login'),
+    path('admin',views.admin_login, name='admin_login'),
     path('verify-otp',views.verify_otp, name='verify_otp'),
     path('edit-customer/<int:edit_id>/',views.edit_customer, name='edit_customer'),
     path('admin-dashboard',views.admin_dashboard, name='admin_dashboard'),
