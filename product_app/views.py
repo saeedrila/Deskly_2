@@ -22,9 +22,6 @@ def shop_all(request):
     if selected_categories:
         products = products.filter(category__id__in=selected_categories)
 
-    if not products.exists():
-        raise Http404("No products found.")
-
     categories = Category.objects.all()
     context = {
         'products': products,

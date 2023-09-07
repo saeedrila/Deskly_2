@@ -12,3 +12,9 @@ deskly_row_image/
 
 # MacOS hidden files
 .DS_Store
+
+# Python bytecode files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
