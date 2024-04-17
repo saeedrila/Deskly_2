@@ -34,7 +34,7 @@ def home(request):
     device_id = request.COOKIES.get("device_id")
     if not device_id:
         device_id = uuid.uuid4()
-        response = render(request, "shop_all.html", context)
+        response = render(request, "home.html", context)
         response.set_cookie("device_id", device_id)
         return response
     return render(request, "home.html", context)
