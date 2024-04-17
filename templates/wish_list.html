@@ -15,40 +15,46 @@
             <div class="row mb-5">
             <form class="col-md-12" method="post">
                 <div class="site-blocks-table">
-                <table class="table table-bordered">
-                    <thead>
-                    <tr>
-                        <th class="product-thumbnail">Image</th>
-                        <th class="product-name">Product Name</th>
-                        <th class="product-quantity">Remove</th>
-                        <th class="product-total">Add to Cart</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in wish_list_items %}
-                        <tr>
-                            <td class="product-thumbnail">
-                                {% if item.product.images.exists %}
-                                <img src="{{ item.product.images.first.image.url }}" alt="Product Image" style="width: 50px; height: 50px;">
-                                {% else %}
-                                <span>No image available</span>
-                                {% endif %}
-                            </td>
-                            <td class="product-name">{{ item.product.name }}</td>
-                            <td>
-                                <a href="#" onclick="removeFromWishList({{ item.product.id }})"  class="btn btn-outline-primary height-auto btn-sm">X</a>
-                            </td>
-                            <td>
-                                <a href="#" onclick="addToCart({{ item.product.id }})" class="btn btn-outline-primary height-auto btn-sm">Add to Cart</a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                  {% if wish_list_items %}
+                  <table class="table table-bordered">
+                      <thead>
+                          <tr>
+                              <th class="product-thumbnail">Image</th>
+                              <th class="product-name">Product Name</th>
+                              <th class="product-quantity">Remove</th>
+                              <th class="product-total">Add to Cart</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          {% for item in wish_list_items %}
+                          <tr>
+                              <td class="product-thumbnail">
+                                  {% if item.product.images.exists %}
+                                  <img src="{{ item.product.images.first.image.url }}" alt="Product Image" style="width: 50px; height: 50px;">
+                                  {% else %}
+                                  <span>No image available</span>
+                                  {% endif %}
+                              </td>
+                              <td class="product-name">{{ item.product.name }}</td>
+                              <td>
+                                  <a href="#" onclick="removeFromWishList({{ item.product.id }})" class="btn btn-outline-primary height-auto btn-sm">X</a>
+                              </td>
+                              <td>
+                                  <a href="#" onclick="addToCart({{ item.product.id }})" class="btn btn-outline-primary height-auto btn-sm">Add to Cart</a>
+                              </td>
+                          </tr>
+                          {% endfor %}
+                      </tbody>
+                  </table>
+              {% else %}
+                  <div class="alert alert-info" role="alert">
+                      There are no products in the wishlist.
+                  </div>
+              {% endif %}              
                 </div>
             </form>
             </div>
-
+            
             <div class="row">
                 <div class="col-md-6">
                     <div class="row mb-5">
