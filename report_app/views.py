@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.contrib import messages
 
 
-#Generate PDF report
+# Generate PDF report
 from django.http import FileResponse
 import io
 from reportlab.pdfgen import canvas
@@ -64,61 +64,66 @@ def report_generator(request, orders):
                 textob.setFont("Helvetica", 14)
     c.save()
     buf.seek(0)
-    request.session['messages'] = "Report successfully generated"
-    return FileResponse(buf, as_attachment=True, filename='test_report_june.pdf')
+    request.session["messages"] = "Report successfully generated"
+    return FileResponse(buf, as_attachment=True, filename="test_report_june.pdf")
+
 
 def report_pdf_order(request):
-    if request.method == 'POST':
-        from_date = request.POST.get('from_date')
-        to_date = request.POST.get('to_date')
+    if request.method == "POST":
+        from_date = request.POST.get("from_date")
+        to_date = request.POST.get("to_date")
         if not from_date or not to_date:
-            return HttpResponse('Please provide both from_date and to_date.')
+            return HttpResponse("Please provide both from_date and to_date.")
         try:
-            from_date = datetime.strptime(from_date, '%Y-%m-%d').date()
-            to_date = datetime.strptime(to_date, '%Y-%m-%d').date()
+            from_date = datetime.strptime(from_date, "%Y-%m-%d").date()
+            to_date = datetime.strptime(to_date, "%Y-%m-%d").date()
         except ValueError:
-            return HttpResponse('Invalid date format.')
-        orders = Order.objects.filter(date__date__range=[from_date, to_date]).order_by('-id')
+            return HttpResponse("Invalid date format.")
+        orders = Order.objects.filter(date__date__range=[from_date, to_date]).order_by(
+            "-id"
+        )
         print(orders)
         messages.success(request, "Report successfully generated")
         return report_generator(request, orders)
-    
-    if 'messages' in request.session:
-        messages.success(request, request.session.pop('messages'))
+
+    if "messages" in request.session:
+        messages.success(request, request.session.pop("messages"))
     context = {}
-    return render(request, 'report_pdf_order.html', context)
+    return render(request, "report_pdf_order.html", context)
+
 
 def chart_demo(request):
-    orders = Order.objects.order_by('-id')[:5]
+    orders = Order.objects.order_by("-id")[:5]
     labels = []
     data = []
     for order in orders:
         labels.append(order.id)
         data.append(order.net_total)
     context = {
-        'labels': labels,
-        'data': data,
+        "labels": labels,
+        "data": data,
     }
 
-    return render(request, 'chart_demo.html', context)
+    return render(request, "chart_demo.html", context)
 
-#Chart_customer_dashboard_order
+
+# Chart_customer_dashboard_order
 def chart_customer_dashboard_order(request):
-    orders = Order.objects.filter(customer=request.user).order_by('-id')[:5]
+    orders = Order.objects.filter(customer=request.user).order_by("-id")[:5]
     labels = []
     data = []
     for order in orders:
         labels.append(order.id)
         data.append(order.net_total)
     context = {
-        'labels': labels,
-        'data': data,
+        "labels": labels,
+        "data": data,
     }
 
-    return render(request, 'chart_customer_dashboard_order.html', context)
+    return render(request, "chart_customer_dashboard_order.html", context)
 
 
-#Sample methods
+# Sample methods
 def example_form(request):
     context = {}
-    return render(request, 'example_form.html', context)
+    return render(request, "example_form.html", context)

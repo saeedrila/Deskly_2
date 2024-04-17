@@ -6,16 +6,27 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('product_app', '0007_product_offer_is_active_product_offer_percentage_and_more'),
+        (
+            "product_app",
+            "0007_product_offer_is_active_product_offer_percentage_and_more",
+        ),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Image',
+            name="Image",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('file', models.ImageField(upload_to='images')),
-                ('uploaded', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("file", models.ImageField(upload_to="images")),
+                ("uploaded", models.DateTimeField(auto_now_add=True)),
             ],
         ),
     ]

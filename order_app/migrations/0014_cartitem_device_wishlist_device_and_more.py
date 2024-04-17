@@ -8,40 +8,63 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('product_app', '0007_product_offer_is_active_product_offer_percentage_and_more'),
+        (
+            "product_app",
+            "0007_product_offer_is_active_product_offer_percentage_and_more",
+        ),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('order_app', '0013_alter_categoryoffer_category'),
+        ("order_app", "0013_alter_categoryoffer_category"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='cartitem',
-            name='device',
+            model_name="cartitem",
+            name="device",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
         migrations.AddField(
-            model_name='wishlist',
-            name='device',
+            model_name="wishlist",
+            name="device",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
         migrations.AlterField(
-            model_name='cartitem',
-            name='customer',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="cartitem",
+            name="customer",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterField(
-            model_name='cartitem',
-            name='product',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='product_app.product'),
+            model_name="cartitem",
+            name="product",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="product_app.product",
+            ),
         ),
         migrations.AlterField(
-            model_name='wishlist',
-            name='customer',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="wishlist",
+            name="customer",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterField(
-            model_name='wishlist',
-            name='product',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='product_app.product'),
+            model_name="wishlist",
+            name="product",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="product_app.product",
+            ),
         ),
     ]

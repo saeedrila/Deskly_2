@@ -6,28 +6,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('product_app', '0006_alter_productimage_image'),
+        ("product_app", "0006_alter_productimage_image"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='product',
-            name='offer_is_active',
+            model_name="product",
+            name="offer_is_active",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='product',
-            name='offer_percentage',
+            model_name="product",
+            name="offer_percentage",
             field=models.PositiveIntegerField(default=0),
         ),
         migrations.AddField(
-            model_name='subproduct',
-            name='offer_is_active',
+            model_name="subproduct",
+            name="offer_is_active",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='subproduct',
-            name='offer_percentage',
+            model_name="subproduct",
+            name="offer_percentage",
             field=models.PositiveIntegerField(default=0),
         ),
     ]

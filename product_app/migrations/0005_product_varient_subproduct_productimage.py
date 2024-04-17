@@ -7,33 +7,63 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('product_app', '0004_alter_product_mrp'),
+        ("product_app", "0004_alter_product_mrp"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='product',
-            name='varient',
-            field=models.CharField(default='Basic', max_length=20),
+            model_name="product",
+            name="varient",
+            field=models.CharField(default="Basic", max_length=20),
         ),
         migrations.CreateModel(
-            name='Subproduct',
+            name="Subproduct",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('subproduct_id', models.CharField(max_length=50)),
-                ('mrp', models.PositiveIntegerField(default=0)),
-                ('stock', models.PositiveIntegerField(default=0)),
-                ('sell_count', models.PositiveIntegerField(default=0)),
-                ('varient', models.CharField(max_length=20)),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='subproducts', to='product_app.product')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("subproduct_id", models.CharField(max_length=50)),
+                ("mrp", models.PositiveIntegerField(default=0)),
+                ("stock", models.PositiveIntegerField(default=0)),
+                ("sell_count", models.PositiveIntegerField(default=0)),
+                ("varient", models.CharField(max_length=20)),
+                (
+                    "product",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="subproducts",
+                        to="product_app.product",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='ProductImage',
+            name="ProductImage",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('image', models.ImageField(upload_to='product_images')),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='images', to='product_app.product')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("image", models.ImageField(upload_to="product_images")),
+                (
+                    "product",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="images",
+                        to="product_app.product",
+                    ),
+                ),
             ],
         ),
     ]

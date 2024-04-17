@@ -8,42 +8,46 @@ from auth_app.models import *
 
 class RegistrationForm(UserCreationForm):
     email = forms.EmailField(
-	    max_length=254, 
-		help_text='Required. Add a valid email address.'
-	)
+        max_length=254, help_text="Required. Add a valid email address."
+    )
     username = forms.CharField(max_length=30)
 
     class Meta:
         model = Account
-        fields = ('email', 'username', 'password1', 'password2', )
+        fields = (
+            "email",
+            "username",
+            "password1",
+            "password2",
+        )
 
 
 class AccountAuthenticationForm(forms.ModelForm):
 
-	password = forms.CharField(label='Password', widget=forms.PasswordInput)
+    password = forms.CharField(label="Password", widget=forms.PasswordInput)
 
-	class Meta:
-		model = Account
-		fields = ('email', 'password')
+    class Meta:
+        model = Account
+        fields = ("email", "password")
 
-	def clean(self):
-		if self.is_valid():
-			email = self.cleaned_data['email']
-			password = self.cleaned_data['password']
-			if not authenticate(email=email, password=password):
-				raise forms.ValidationError("Invalid login credentials")
+    def clean(self):
+        if self.is_valid():
+            email = self.cleaned_data["email"]
+            password = self.cleaned_data["password"]
+            if not authenticate(email=email, password=password):
+                raise forms.ValidationError("Invalid login credentials")
 
 
 class AccountUpdateForm(forms.ModelForm):
 
-	class Meta:
-		model = Account
-		fields = ('email', )
+    class Meta:
+        model = Account
+        fields = ("email",)
 
-	def clean_email(self):
-		email = self.cleaned_data['email']
-		try:
-			account = Account.objects.exclude(pk=self.instance.pk).get(email=email)
-		except Account.DoesNotExist:
-			return email
-		raise forms.ValidationError('Email "%s" is already in use.' % account)
+    def clean_email(self):
+        email = self.cleaned_data["email"]
+        try:
+            account = Account.objects.exclude(pk=self.instance.pk).get(email=email)
+        except Account.DoesNotExist:
+            return email
+        raise forms.ValidationError('Email "%s" is already in use.' % account)

@@ -7,38 +7,63 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('product_app', '0002_names'),
-        ('order_app', '0008_order_razorpay_paid'),
+        ("product_app", "0002_names"),
+        ("order_app", "0008_order_razorpay_paid"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='order',
-            name='reward_points',
+            model_name="order",
+            name="reward_points",
             field=models.PositiveIntegerField(default=0),
         ),
         migrations.AddField(
-            model_name='order',
-            name='shipping_cost',
+            model_name="order",
+            name="shipping_cost",
             field=models.PositiveIntegerField(default=0),
         ),
         migrations.AlterField(
-            model_name='order',
-            name='product',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='product_app.product'),
+            model_name="order",
+            name="product",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="product_app.product",
+            ),
         ),
         migrations.AlterField(
-            model_name='order',
-            name='quantity',
+            model_name="order",
+            name="quantity",
             field=models.PositiveIntegerField(blank=True, default=1, null=True),
         ),
         migrations.CreateModel(
-            name='OrderItem',
+            name="OrderItem",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('quantity', models.PositiveIntegerField(default=1)),
-                ('order', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='order_app.order')),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='product_app.product')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("quantity", models.PositiveIntegerField(default=1)),
+                (
+                    "order",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="order_app.order",
+                    ),
+                ),
+                (
+                    "product",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="product_app.product",
+                    ),
+                ),
             ],
         ),
     ]

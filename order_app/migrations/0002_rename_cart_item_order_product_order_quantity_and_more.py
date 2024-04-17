@@ -7,23 +7,23 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('order_app', '0001_initial'),
+        ("order_app", "0001_initial"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='order',
-            old_name='cart_item',
-            new_name='product',
+            model_name="order",
+            old_name="cart_item",
+            new_name="product",
         ),
         migrations.AddField(
-            model_name='order',
-            name='quantity',
+            model_name="order",
+            name="quantity",
             field=models.PositiveIntegerField(default=1),
         ),
         migrations.AlterField(
-            model_name='order',
-            name='date',
+            model_name="order",
+            name="date",
             field=models.DateTimeField(default=django.utils.timezone.now),
         ),
     ]

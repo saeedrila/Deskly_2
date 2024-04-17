@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
@@ -20,14 +21,13 @@ from django.conf.urls.static import static
 
 
 urlpatterns = [
-    path('django-admin/', admin.site.urls),
-    path('',include('auth_app.urls') ),
-    path('',include('order_app.urls') ),
-    path('',include('product_app.urls') ),
-    path('',include('report_app.urls') ),
-
-#Google Auth related
-    path('accounts/', include('allauth.urls')),
+    path("django-admin/", admin.site.urls),
+    path("", include("auth_app.urls")),
+    path("", include("order_app.urls")),
+    path("", include("product_app.urls")),
+    path("", include("report_app.urls")),
+    # Google Auth related
+    path("accounts/", include("allauth.urls")),
 ]
 
 if settings.DEBUG:

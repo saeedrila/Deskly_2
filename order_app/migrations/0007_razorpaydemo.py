@@ -6,18 +6,26 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('order_app', '0006_order_net_total_order_razorpay_order_id_and_more'),
+        ("order_app", "0006_order_net_total_order_razorpay_order_id_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='RazorpayDemo',
+            name="RazorpayDemo",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('amount', models.CharField(max_length=100)),
-                ('payment_id', models.CharField(max_length=100)),
-                ('paid', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                ("amount", models.CharField(max_length=100)),
+                ("payment_id", models.CharField(max_length=100)),
+                ("paid", models.BooleanField(default=False)),
             ],
         ),
     ]
