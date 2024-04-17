@@ -14,31 +14,31 @@
             <div class="container">
 
                 <div class="row">
-                    <div class="col-md-6">
-                        <div class="item-entry">
-                            <div class="product-item md-height bg-gray d-block">
-                                <div class="row">
-                                    {% for image in product.images.all %}
-                                    <div class="col-md-6">
-                                        <div class="item">
-                                            <img src="{{ image.image.url }}" alt="Image" class="img-fluid">
-                                        </div>
+                  <div class="col-md-6">
+                    <div class="item-entry">
+                        <div class="product-item md-height bg-gray d-block">
+                            <div class="row">
+                                {% for image in product.images.all %}
+                                <div class="col-md-6">
+                                    <div class="item">
+                                        <img src="{{ image.image.url }}" alt="Image" class="img-fluid">
                                     </div>
-                                    {% if forloop.counter == 2 %}
                                 </div>
-                                <div class="row">
-                                    {% endif %}
-                                    {% empty %}
-                                    <div class="col-md-6">
-                                        <div class="item">
-                                            <span>No image available</span>
-                                        </div>
+                                {% if forloop.counter == 2 %}
+                            </div>
+                            <div class="row">
+                                {% endif %}
+                                {% empty %}
+                                <div class="col-md-6">
+                                    <div class="item">
+                                        <span>No image available</span>
                                     </div>
-                                    {% endfor %}
                                 </div>
+                                {% endfor %}
                             </div>
                         </div>
                     </div>
+                </div>
 
                     <div class="col-md-6">
                         <h2 class="text-black">{{product.name}}</h2>

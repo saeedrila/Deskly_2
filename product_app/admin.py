@@ -2,6 +2,7 @@ from django.utils.html import format_html
 
 from django.contrib import admin
 from .models import *
+from .forms import ProductForm
 
 
 # Seach with suggession demo db
@@ -102,7 +103,16 @@ class SubcategoryAdmin(admin.ModelAdmin):
 admin.site.register(Subcategory, SubcategoryAdmin)
 
 
+class ProductImageInline(admin.TabularInline):
+    model = ProductImage
+    extra = 1
+    fields = ("image",)  # Specify the fields to be displayed in the inline form
+
+
 class ProductAdmin(admin.ModelAdmin):
+    form = ProductForm  # Use ProductForm for adding/editing products
+    inlines = [ProductImageInline]  # Include ProductImageInline inlines
+
     list_display = (
         "name",
         "brand",
@@ -129,6 +139,25 @@ class ProductAdmin(admin.ModelAdmin):
     )
     search_fields = ("name", "description")
 
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "name",
+                    "brand",
+                    "description",
+                    "category",
+                    "sub_category",
+                    "mrp",
+                    "sell_count",
+                    "availability",
+                    "stock",
+                )
+            },
+        ),
+    )
+
     def short_description(self, obj):
         max_length = 30
         if len(obj.description) > max_length:
@@ -139,17 +168,19 @@ class ProductAdmin(admin.ModelAdmin):
     short_description.short_description = "Description"
 
     def display_image(self, obj):
-        if obj.image:
+        product_image = obj.images.first()  # Get the first associated image
+        if product_image and product_image.image:
             # Calculate the height while maintaining the aspect ratio
             width = 50
-            height = int(obj.image.height * (width / obj.image.width))
+            height = int(
+                product_image.image.height * (width / product_image.image.width)
+            )
             return format_html(
                 '<img src="{}" width="{}" height="{}" />'.format(
-                    obj.image.url, width, height
+                    product_image.image.url, width, height
                 )
             )
-        else:
-            return ""
+        return ""
 
     display_image.short_description = "Image"
 

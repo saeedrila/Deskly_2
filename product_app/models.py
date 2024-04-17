@@ -53,7 +53,6 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     sub_category = models.ForeignKey(Subcategory, on_delete=models.CASCADE)
     mrp = models.PositiveIntegerField(default=0)
-    image = models.ImageField(upload_to="products")
     availability = models.BooleanField(default=False)
     stock = models.PositiveIntegerField(default=0)
     sell_count = models.PositiveIntegerField(default=0)
@@ -68,22 +67,6 @@ class Product(models.Model):
     class Meta:
         verbose_name = "Product"
         verbose_name_plural = "Products"
-
-
-class Subproduct(models.Model):
-    product = models.ForeignKey(
-        Product, related_name="subproducts", on_delete=models.CASCADE
-    )
-    subproduct_id = models.CharField(max_length=50)
-    mrp = models.PositiveIntegerField(default=0)
-    stock = models.PositiveIntegerField(default=0)
-    sell_count = models.PositiveIntegerField(default=0)
-    varient = models.CharField(max_length=20)
-    offer_is_active = models.BooleanField(default=False)
-    offer_percentage = models.PositiveIntegerField(default=0)
-
-    def __str__(self):
-        return f"Subproduct {self.subproduct_id} of {self.product.name}"
 
 
 def product_image_upload_to(instance, filename):

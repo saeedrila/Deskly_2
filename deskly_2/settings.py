@@ -15,12 +15,11 @@ SECRET_KEY = config("SECRET_KEY")
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "13.235.65.146",
-    "saeedrila.dev",
-    "www.saeedrila.dev",
+    "15.207.121.231",
+    "deskly.online",
+    "www.deskly.online",
     "localhost",
     "127.0.0.1",
-    "https://saeedrila.dev/",
 ]
 
 
@@ -78,7 +77,6 @@ TEMPLATES = [
     },
 ]
 
-# Very important should do before first migration
 AUTH_USER_MODEL = "auth_app.Account"
 
 WSGI_APPLICATION = "deskly_2.wsgi.application"

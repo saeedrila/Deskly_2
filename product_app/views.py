@@ -47,12 +47,14 @@ def product_page(request, product_id=None):
             product_retail_price = round(
                 product.mrp * (1 - product.offer_percentage / 100)
             )
+            product.offer_product_price = product_retail_price
             context["product_offer"] = product.offer_percentage
         else:
             product_retail_price = product.mrp
 
-        category_id = product.category_id
-        category_offers = CategoryOffer.objects.filter(category_id=category_id)[:1]
+        category_offers = CategoryOffer.objects.filter(category_id=product.category_id)[
+            :1
+        ]
         if category_offers.exists():
             category_offer = category_offers[0]
             discount_percentage = category_offer.discount_percentage
@@ -63,10 +65,8 @@ def product_page(request, product_id=None):
             print("Category offer exists")
         else:
             print("No category offer found")
-        context["product"] = product
 
-    except Product.DoesNotExist:
-        return render(request, "404.html")
+        context = {"product": product}
 
     except Product.DoesNotExist:
         raise Http404("Product does not exist.")
@@ -75,7 +75,9 @@ def product_page(request, product_id=None):
     if not device_id:
         device_id = uuid.uuid4()
         response = render(request, "shop_all.html", context)
-        response.set_cookie("device_id", device_id)
+        response.set_cookie(
+            "device_id", device_id, max_age=604800
+        )  # Set max_age to 1 week (604800 seconds)
         return response
 
     return render(request, "product_page.html", context)

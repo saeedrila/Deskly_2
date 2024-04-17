@@ -26,7 +26,7 @@ class ProductForm(forms.ModelForm):
     image_files = MultiFileField(
         label="Product Images",
         required=False,
-        max_num=5,
+        max_num=2,
         max_file_size=1024 * 1024 * 5,  # 5MB
         min_num=1,
     )
