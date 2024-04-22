@@ -4,10 +4,10 @@ from django.contrib import messages
 
 PAYMENT_CHOICES = (
     ("cod", "Cash On Delivery"),
-    ("razorpay", "Razorpay"),
-    ("bank_transfer", "Direct Bank Transfer"),
-    ("paytm", "PayTm"),
-    ("paypal", "Paypal"),
+    # ("razorpay", "Razorpay"),
+    # ("bank_transfer", "Direct Bank Transfer"),
+    # ("paytm", "PayTm"),
+    # ("paypal", "Paypal"),
 )
 
 
