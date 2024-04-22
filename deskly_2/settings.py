@@ -7,7 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config("SECRET_KEY")
 
-ENVIRONMENT = os.environ.get("DJANGO_ENV", "development")
+ENVIRONMENT = config("ENVIRONMENT", "production")
 if ENVIRONMENT == "production":
     DEBUG = False
 else:
